@@ -1,15 +1,59 @@
+import type { CPUResponse } from "../services/api";
+import { Cpu } from "lucide-react";
+
 interface CPUCardProps {
-    usage: number | null;
+    cpu: CPUResponse | null;
 }
 
-export default function CPUCard({ usage }: CPUCardProps) {
+export default function CPUCard({ cpu }: CPUCardProps) {
     return (
-        <div>
-            <h2>CPU</h2>
+        <section className="metric-card">
+            <h2 className="card-title">
+                <Cpu size={22} />
+                CPU
+            </h2>
 
-            <p>
-                {usage === null ? "Loading cpu usage..." : `${usage.toFixed(1)}%`}
-            </p>
-        </div>
+            {cpu === null ? (
+                <p className="metric-empty">Loading CPU...</p>
+            ) : (
+                <>
+                    <p className="metric-lead">
+                        {cpu.name ?? "Unknown Processor"}
+                    </p>
+
+                    <p className="metric-primary">
+                        {cpu.usage.toFixed(1)}%
+                    </p>
+
+                    <progress
+                        className="usage-progress"
+                        value={cpu.usage}
+                        max={100}
+                        aria-label="CPU utilization"
+                    />
+
+                    <dl className="metric-details">
+                        <div className="detail-row">
+                            <dt>Physical Cores</dt>
+                            <dd>{cpu.physical_cores ?? "N/A"}</dd>
+                        </div>
+
+                        <div className="detail-row">
+                            <dt>Logical Cores</dt>
+                            <dd>{cpu.logical_cores ?? "N/A"}</dd>
+                        </div>
+
+                        <div className="detail-row">
+                            <dt>Frequency</dt>
+                            <dd>
+                                {cpu.frequency_mhz === null
+                                    ? "N/A"
+                                    : `${(cpu.frequency_mhz / 1000).toFixed(2)} GHz`}
+                            </dd>
+                        </div>
+                    </dl>
+                </>
+            )}
+        </section>
     );
 }

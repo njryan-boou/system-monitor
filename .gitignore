@@ -2,14 +2,12 @@
 __pycache__/
 *.pyc
 .venv/
+*.egg-info/
+build/
 
-# Node
+# Frontend
 node_modules/
 dist/
 
-# Environment
+# Environment variables
 .env
-
-# IDE
-.vscode/
-.idea/

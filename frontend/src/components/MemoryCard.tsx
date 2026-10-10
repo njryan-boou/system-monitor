@@ -1,29 +1,59 @@
 import type { MemoryResponse } from "../services/api";
+import { MemoryStick } from "lucide-react";
 
 interface MemoryCardProps {
     memory: MemoryResponse | null;
 }
 
 export default function MemoryCard({ memory }: MemoryCardProps) {
-    if (memory === null) {
-        return <p>Loading memory information...</p>;
-    }
-
     const toGiB = (bytes: number): string => {
         return (bytes / (1024 ** 3)).toFixed(1);
     };
 
     return (
-        <div>
-            <h2>Memory</h2>
+        <section className="metric-card">
+            <h2 className="card-title">
+                <MemoryStick size={22} />
+                Memory
+            </h2>
 
-            <p>Usage: {memory.percent.toFixed(1)}%</p>
+            {memory === null ? (
+                <p className="metric-empty">Loading memory...</p>
+            ) : (
+                <>
+                    <p className="metric-lead">
+                        RAM Utilization
+                    </p>
 
-            <p>Used: {toGiB(memory.used)} GiB</p>
+                    <p className="metric-primary">
+                        {memory.percent.toFixed(1)}%
+                    </p>
 
-            <p>Available: {toGiB(memory.available)} GiB</p>
+                    <progress
+                        className="usage-progress"
+                        value={memory.percent}
+                        max={100}
+                        aria-label="Memory utilization"
+                    />
 
-            <p>Total: {toGiB(memory.total)} GiB</p>
-        </div>
+                    <dl className="metric-details">
+                        <div className="detail-row">
+                            <dt>Used</dt>
+                            <dd>{toGiB(memory.used)} GiB</dd>
+                        </div>
+
+                        <div className="detail-row">
+                            <dt>Available</dt>
+                            <dd>{toGiB(memory.available)} GiB</dd>
+                        </div>
+
+                        <div className="detail-row">
+                            <dt>Total</dt>
+                            <dd>{toGiB(memory.total)} GiB</dd>
+                        </div>
+                    </dl>
+                </>
+            )}
+        </section>
     );
 }
