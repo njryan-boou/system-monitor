@@ -1,3 +1,4 @@
+import sys
 from pathlib import Path
 
 from fastapi import FastAPI
@@ -21,11 +22,16 @@ def health():
 
 
 # Locate the React production build
-PROJECT_ROOT = Path(__file__).resolve().parents[2]
-FRONTEND_DIST = PROJECT_ROOT / "frontend" / "dist"
+if getattr(sys, "frozen", False):
+    # Running as a PyInstaller executable
+    FRONTEND_DIST = Path(sys._MEIPASS) / "frontend" / "dist"
+else:
+    # Running from the source repository
+    PROJECT_ROOT = Path(__file__).resolve().parents[2]
+    FRONTEND_DIST = PROJECT_ROOT / "frontend" / "dist"
 
 
-# Serve React if a production build exists
+# Serve the frontend when available
 if (FRONTEND_DIST / "index.html").is_file():
     app.mount(
         "/",
