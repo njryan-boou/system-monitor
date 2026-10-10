@@ -117,51 +117,22 @@ system-monitor/
 │
 ├── frontend/
 │   ├── public/
-│   │   └── favicon.svg
-│   │
 │   ├── src/
-│   │   ├── components/
-│   │   │   ├── CPUCard.tsx
-│   │   │   ├── MemoryCard.tsx
-│   │   │   ├── DiskCard.tsx
-│   │   │   └── SystemCard.tsx
-│   │   │
-│   │   ├── pages/
-│   │   │   └── Dashboard.tsx
-│   │   │
-│   │   ├── services/
-│   │   │   └── api.ts
-│   │   │
-│   │   ├── App.tsx
-│   │   ├── App.css
-│   │   ├── index.css
-│   │   └── main.tsx
-│   │
-│   ├── index.html
 │   ├── package.json
-│   ├── vite.config.ts
-│   └── vercel.json
+│   └── vite.config.ts
 │
 ├── backend/
 │   ├── app/
-│   │   ├── routes/
-│   │   │   └── system.py
-│   │   │
-│   │   ├── schemas/
-│   │   │   └── system.py
-│   │   │
-│   │   ├── services/
-│   │   │   └── monitor.py
-│   │   │
-│   │   └── main.py
-│   │
 │   ├── tests/
-│   │   └── test_api.py
-│   │
 │   └── pyproject.toml
 │
-├── .gitignore
-└── README.md
+├── scripts/
+│   ├── setup.sh
+│   ├── run.sh
+│   └── run.ps1
+│
+├── README.md
+└── .gitignore
 ```
 
 ## Architecture
