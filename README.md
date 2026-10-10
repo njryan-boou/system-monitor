@@ -231,7 +231,7 @@ hardware, drivers, and permissions.
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/YOUR-USERNAME/system-monitor.git
+git clone https://github.com/njryan-boou/system-monitor.git
 
 cd system-monitor
 ```
@@ -362,6 +362,44 @@ FastAPI
 ```
 
 The development proxy is configured in `frontend/vite.config.ts`.
+
+## Standalone Local Application (v0.2.0 in development)
+
+System Monitor can be packaged with PyInstaller so end users can run it
+without installing Python, Node.js, or application dependencies.
+
+The executable starts the local FastAPI server on `127.0.0.1:8000`
+and opens the monitoring dashboard in the default browser.
+It displays hardware information from the computer running the executable.
+
+**Build on Linux:** From the repository root, after running `./scripts/setup.sh`
+and installing PyInstaller into `backend/.venv`:
+
+```bash
+backend/.venv/bin/python -m pip install pyinstaller
+./scripts/build-linux.sh
+./backend/dist/system-monitor-linux
+```
+
+**Build on Windows:** From PowerShell in the repository root, with Python 3
+and Node.js/npm installed:
+
+```powershell
+.\scripts\build-windows.ps1
+.\backend\dist\SystemMonitor.exe
+```
+
+The build scripts compile the frontend and bundle the application into a
+single executable. Building requires development tools, but running the
+packaged application does not. Builds must be produced on their target
+operating system (Linux for Linux, Windows for Windows).
+
+> Windows packaging has not yet been verified. Linux executable
+> compatibility depends on the target system's native libraries; the
+> current Linux build has been tested on the development machine,
+> including when launched from outside the source repository.
+>
+> Do not expose the local unauthenticated API to the public internet.
 
 ## API Documentation
 
