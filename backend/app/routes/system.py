@@ -52,6 +52,6 @@ def network_info():
 
 @router.get("/gpu", response_model=GPUResponse)
 def gpu_info(
-    vendor: Literal["nvidia", "amd"] | None = None
+    vendor: Literal["nvidia", "amd", "intel"] | None = None
 ):
     return get_gpu_info(vendor)

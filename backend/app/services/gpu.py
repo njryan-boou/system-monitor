@@ -6,18 +6,36 @@ from app.services.gpu_nvidia import (
 )
 
 from app.services.gpu_amd import get_amd_gpu_info
+from app.services.gpu_intel import get_intel_gpu_info
 
 
 def get_gpu_info(
-    vendor: Literal["nvidia", "amd"] | None = None
+    vendor: Literal["nvidia", "amd", "intel"] | None = None
 ) -> dict:
+
+    if vendor == "nvidia":
+        return get_nvidia_gpu_info()
 
     if vendor == "amd":
         return get_amd_gpu_info() or unavailable_gpu_info()
 
+    if vendor == "intel":
+        return get_intel_gpu_info() or unavailable_gpu_info()
+
+    # Automatic GPU selection
     nvidia = get_nvidia_gpu_info()
 
-    if vendor == "nvidia" or nvidia["available"]:
+    if nvidia["available"]:
         return nvidia
 
-    return get_amd_gpu_info() or unavailable_gpu_info()
+    amd = get_amd_gpu_info()
+
+    if amd is not None:
+        return amd
+
+    intel = get_intel_gpu_info()
+
+    if intel is not None:
+        return intel
+
+    return unavailable_gpu_info()

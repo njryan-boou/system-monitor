@@ -43,3 +43,4 @@ class GPUResponse(BaseModel):
     memory_used: int | None
     memory_total: int | None
     temperature_c: int | None
+    usage_label: str | None = None

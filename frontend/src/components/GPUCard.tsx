@@ -25,12 +25,12 @@ function GPUCard({ gpu }: GPUCardProps) {
                 <p className="metric-empty">Loading GPU...</p>
             ) : !gpu.available ? (
                 <p className="metric-empty">
-                    NVIDIA GPU unavailable
+                    GPU monitoring unavailable
                 </p>
             ) : (
                 <>
                     <p className="metric-lead">
-                        {gpu.name ?? "NVIDIA GPU"}
+                        {gpu.name ?? "Graphics Processor"}
                     </p>
 
                     <p className="metric-primary">
@@ -40,7 +40,7 @@ function GPUCard({ gpu }: GPUCardProps) {
                     </p>
 
                     <p className="metric-lead">
-                        GPU Utilization
+                        {gpu.usage_label ?? "GPU Utilization"}
                     </p>
 
                     <progress

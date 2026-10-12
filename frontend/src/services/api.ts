@@ -40,6 +40,7 @@ export interface GPUResponse {
     memory_used: number | null;
     memory_total: number | null;
     temperature_c: number | null;
+    usage_label?: string | null;
 }
 
 export interface NetworkResponse extends NetworkCountersResponse {
