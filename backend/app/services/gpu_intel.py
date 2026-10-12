@@ -1,18 +1,17 @@
 from functools import lru_cache
 from pathlib import Path
 from threading import Lock
-from time import monotonic
 
+
+ENGINES = ("rcs", "ccs", "vcs", "vecs", "bcs")
 
 _sample_lock = Lock()
 _previous_sample = None
 
 
 @lru_cache(maxsize=1)
-def get_intel_gpu() -> tuple[Path, Path] | None:
-    drm = Path("/sys/class/drm")
-
-    for card in sorted(drm.glob("card[0-9]*")):
+def get_intel_gpu() -> Path | None:
+    for card in sorted(Path("/sys/class/drm").glob("card[0-9]*")):
         if not card.name[4:].isdigit():
             continue
 
@@ -22,41 +21,94 @@ def get_intel_gpu() -> tuple[Path, Path] | None:
             vendor = (device / "vendor").read_text().strip()
             driver = (device / "driver").resolve().name
 
-            if vendor != "0x8086" or driver != "xe":
-                continue
-
-            # Prefer the render GT (gt0).
-            counters = sorted(
-                device.glob("tile*/gt0/gtidle/idle_residency_ms")
-            )
-
-            if not counters:
-                continue
-
-            return device, counters[0]
-
+            if vendor == "0x8086" and driver == "xe":
+                return device.resolve()
         except OSError:
             continue
 
     return None
 
 
-def read_int(path: Path) -> int | None:
-    try:
-        return int(path.read_text().strip())
-    except (OSError, ValueError):
-        return None
+def get_gpu_clients(pci_address: str) -> dict:
+    clients = {}
+
+    for fd in Path("/proc").glob("[0-9]*/fdinfo/*"):
+        try:
+            fields = {}
+
+            for line in fd.read_text().splitlines():
+                key, separator, value = line.partition(":")
+
+                if separator:
+                    fields[key.strip()] = value.strip()
+
+            if fields.get("drm-driver") != "xe":
+                continue
+
+            if fields.get("drm-pdev") != pci_address:
+                continue
+
+            client_id = fields.get("drm-client-id")
+
+            if client_id is None or client_id in clients:
+                continue
+
+            counters = {}
+
+            for engine in ENGINES:
+                try:
+                    busy = int(fields[f"drm-cycles-{engine}"])
+                    total = int(fields[f"drm-total-cycles-{engine}"])
+                    counters[engine] = (busy, total)
+                except (KeyError, ValueError):
+                    continue
+
+            clients[client_id] = counters
+
+        except (OSError, UnicodeError):
+            continue
+
+    return clients
+
+
+def calculate_peak_activity(previous: dict, current: dict):
+    peak = None
+
+    for client_id in previous.keys() & current.keys():
+        old_client = previous[client_id]
+        new_client = current[client_id]
+
+        for engine in ENGINES:
+            if engine not in old_client or engine not in new_client:
+                continue
+
+            old_busy, old_total = old_client[engine]
+            new_busy, new_total = new_client[engine]
+
+            busy_delta = new_busy - old_busy
+            total_delta = new_total - old_total
+
+            if busy_delta < 0 or total_delta <= 0:
+                continue
+
+            activity = max(
+                0.0,
+                min(100.0, 100.0 * busy_delta / total_delta)
+            )
+
+            if peak is None or activity > peak:
+                peak = activity
+
+    return round(peak, 1) if peak is not None else None
 
 
 def get_intel_gpu_info() -> dict | None:
     global _previous_sample
 
-    gpu = get_intel_gpu()
+    device = get_intel_gpu()
 
-    if gpu is None:
+    if device is None:
         return None
-
-    device, counter = gpu
 
     try:
         device_id = (device / "device").read_text().strip().lower()
@@ -69,44 +121,23 @@ def get_intel_gpu_info() -> dict | None:
         else "Intel Graphics"
     )
 
-    usage = None
-
     with _sample_lock:
-        idle_ms = read_int(counter)
-        now = monotonic()
+        current = get_gpu_clients(device.name)
 
-        if idle_ms is not None:
-            if _previous_sample is not None:
-                previous_time, previous_idle = _previous_sample
+        usage = (
+            calculate_peak_activity(_previous_sample, current)
+            if _previous_sample is not None
+            else None
+        )
 
-                elapsed_ms = (now - previous_time) * 1000
-                idle_delta = idle_ms - previous_idle
-
-                if (
-                    elapsed_ms >= 250
-                    and 0 <= idle_delta <= elapsed_ms * 1.1
-                ):
-                    usage = round(
-                        max(
-                            0.0,
-                            min(
-                                100.0,
-                                100.0 * (
-                                    1 - idle_delta / elapsed_ms
-                                )
-                            )
-                        ),
-                        1
-                    )
-
-            _previous_sample = (now, idle_ms)
+        _previous_sample = current
 
     return {
         "available": True,
         "name": name,
         "usage": usage,
-        "usage_label": "Render GT non-idle (estimate)",
+        "usage_label": "Peak Client Engine Activity",
         "memory_used": None,
         "memory_total": None,
-        "temperature_c": None
+        "temperature_c": None,
     }
