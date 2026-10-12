@@ -29,3 +29,8 @@ class SystemResponse(BaseModel):
     os_release: str
     architecture: str
     uptime: int
+    
+    
+class NetworkResponse(BaseModel):
+    bytes_sent: int
+    bytes_recv: int

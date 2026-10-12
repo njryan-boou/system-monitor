@@ -2,6 +2,7 @@ import CPUCard from "../components/CPUCard";
 import MemoryCard from "../components/MemoryCard";
 import DiskCard from "../components/DiskCard";
 import SystemCard from "../components/SystemCard";
+import NetworkCard from "../components/NetworkCard";
 
 import usePolling from "../hooks/usePolling";
 
@@ -11,7 +12,8 @@ import {
     getCPUInfo,
     getMemoryUsage,
     getStorageInfo,
-    getSystemInfo
+    getSystemInfo,
+    getNetworkInfo
 } from "../services/api";
 
 
@@ -28,11 +30,15 @@ export default function Dashboard() {
     const { data: system, error: systemError } =
         usePolling(getSystemInfo, 5000);
 
+    const { data: network, error: networkError } =
+        usePolling(getNetworkInfo, 1000);
+
     const errors = [
         cpuError ? "CPU" : null,
         memoryError ? "Memory" : null,
         storageError ? "Storage" : null,
-        systemError ? "System" : null
+        systemError ? "System" : null,
+        networkError ? "Network" : null
     ].filter(Boolean);
 
     return (
@@ -57,6 +63,7 @@ export default function Dashboard() {
                 <MemoryCard memory={memory} />
                 <DiskCard storage={storage} />
                 <SystemCard system={system} />
+                <NetworkCard network={network} />
             </div>
 
             <footer className="dashboard-footer">

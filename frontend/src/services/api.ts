@@ -28,6 +28,17 @@ export interface SystemResponse {
     uptime: number;
 }
 
+export interface NetworkCountersResponse {
+    bytes_sent: number;
+    bytes_recv: number;
+}
+
+export interface NetworkResponse extends NetworkCountersResponse {
+    download_bytes_per_sec: number;
+    upload_bytes_per_sec: number;
+    ready: boolean;
+}
+
 export async function getCPUInfo(): Promise<CPUResponse> {
     const response = await fetch("/api/system/cpu");
 
@@ -66,4 +77,54 @@ export async function getSystemInfo(): Promise<SystemResponse> {
     }
 
     return await response.json();
+}
+
+let previousNetworkSample: (
+    NetworkCountersResponse & { timestamp: number }
+) | null = null;
+
+export async function getNetworkInfo(): Promise<NetworkResponse> {
+    const response = await fetch("/api/system/network");
+
+    if (!response.ok) {
+        throw new Error("Failed to fetch network information");
+    }
+
+    const counters: NetworkCountersResponse = await response.json();
+    const timestamp = performance.now();
+
+    let download = 0;
+    let upload = 0;
+    let ready = false;
+
+    if (previousNetworkSample !== null) {
+        const elapsed =
+            (timestamp - previousNetworkSample.timestamp) / 1000;
+
+        if (elapsed > 0) {
+            download = Math.max(
+                0,
+                counters.bytes_recv - previousNetworkSample.bytes_recv
+            ) / elapsed;
+
+            upload = Math.max(
+                0,
+                counters.bytes_sent - previousNetworkSample.bytes_sent
+            ) / elapsed;
+
+            ready = true;
+        }
+    }
+
+    previousNetworkSample = {
+        ...counters,
+        timestamp
+    };
+
+    return {
+        ...counters,
+        download_bytes_per_sec: download,
+        upload_bytes_per_sec: upload,
+        ready
+    };
 }

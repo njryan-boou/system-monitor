@@ -64,3 +64,15 @@ def get_system_info() -> dict:
         "architecture": platform.machine(),
         "uptime": int(time.time() - psutil.boot_time())
     }
+    
+    
+def get_network_info() -> dict:
+    network = psutil.net_io_counters()
+
+    if network is None:
+        raise RuntimeError("Network statistics unavailable")
+
+    return {
+        "bytes_sent": network.bytes_sent,
+        "bytes_recv": network.bytes_recv
+    }

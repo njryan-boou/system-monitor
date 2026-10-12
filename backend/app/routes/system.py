@@ -4,14 +4,16 @@ from app.services.monitor import (
     get_cpu_info,
     get_memory_usage,
     get_storage_info,
-    get_system_info
+    get_system_info,
+    get_network_info
 )
 
 from app.schemas.system import (
     CPUResponse,
     MemoryResponse,
     StorageResponse,
-    SystemResponse
+    SystemResponse,
+    NetworkResponse
 )
 
 
@@ -36,3 +38,8 @@ def storage_info():
 @router.get("/info", response_model=SystemResponse)
 def system_info():
     return get_system_info()
+
+
+@router.get("/network", response_model=NetworkResponse)
+def network_info():
+    return get_network_info()
