@@ -5,6 +5,8 @@ import SystemCard from "../components/SystemCard";
 
 import usePolling from "../hooks/usePolling";
 
+import packageInfo from "../../package.json";
+
 import {
     getCPUInfo,
     getMemoryUsage,
@@ -56,6 +58,20 @@ export default function Dashboard() {
                 <DiskCard storage={storage} />
                 <SystemCard system={system} />
             </div>
+
+            <footer className="dashboard-footer">
+                <span>System Monitor v{packageInfo.version}</span>
+                <span>•</span>
+                <span>React + FastAPI</span>
+                <span>•</span>
+                <a
+                    href="https://github.com/njryan-boou/system-monitor"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                >
+                    GitHub
+                </a>
+            </footer>
         </main>
     );
 }

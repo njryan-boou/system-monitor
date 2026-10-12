@@ -23,7 +23,6 @@ def get_cpu_log_cores() -> int | None:
 
 def get_cpu_info() -> dict:
     frequency = psutil.cpu_freq()
-    cpu = get_cpu_details()
 
     return {
         "name": get_cpu_name(),
