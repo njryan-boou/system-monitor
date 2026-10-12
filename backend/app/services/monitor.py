@@ -11,15 +11,25 @@ def get_cpu_name() -> str | None:
     return get_cpu_details().get("brand_raw")
 
 
+@lru_cache(maxsize=1)
+def get_cpu_phys_cores() -> int | None:
+    return psutil.cpu_count(logical=False)
+
+
+@lru_cache(maxsize=1)
+def get_cpu_log_cores() -> int | None:
+    return psutil.cpu_count(logical=True)
+
+
 def get_cpu_info() -> dict:
     frequency = psutil.cpu_freq()
     cpu = get_cpu_details()
 
     return {
         "name": get_cpu_name(),
-        "usage": psutil.cpu_percent(interval=1),
-        "physical_cores": psutil.cpu_count(logical=False),
-        "logical_cores": psutil.cpu_count(logical=True),
+        "usage": psutil.cpu_percent(interval=None),
+        "physical_cores": get_cpu_phys_cores(),
+        "logical_cores": get_cpu_log_cores(),
         "frequency_mhz": frequency.current if frequency else None
     }
 
