@@ -43,12 +43,14 @@ function GPUCard({ gpu }: GPUCardProps) {
                         {gpu.usage_label ?? "GPU Utilization"}
                     </p>
 
-                    <progress
-                        className="usage-progress"
-                        value={gpu.usage ?? 0}
-                        max={100}
-                        aria-label="GPU utilization"
-                    />
+                    {gpu.usage !== null && (
+                        <progress
+                            className="usage-progress"
+                            value={gpu.usage}
+                            max={100}
+                            aria-label={gpu.usage_label ?? "GPU utilization"}
+                        />
+                    )}
 
                     <dl className="metric-details">
                         <div className="detail-row">
