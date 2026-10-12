@@ -8,12 +8,15 @@ from app.services.monitor import (
     get_network_info
 )
 
+from app.services.gpu import get_gpu_info
+
 from app.schemas.system import (
     CPUResponse,
     MemoryResponse,
     StorageResponse,
     SystemResponse,
-    NetworkResponse
+    NetworkResponse,
+    GPUResponse
 )
 
 
@@ -43,3 +46,8 @@ def system_info():
 @router.get("/network", response_model=NetworkResponse)
 def network_info():
     return get_network_info()
+
+
+@router.get("/gpu", response_model=GPUResponse)
+def gpu_info():
+    return get_gpu_info()

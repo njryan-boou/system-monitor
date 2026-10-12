@@ -13,7 +13,8 @@ dependencies = [
     "uvicorn",
     "psutil",
     "py-cpuinfo",
-    "pydantic"
+    "pydantic",
+    "nvidia-ml-py"
 ]
 
 [tool.setuptools.packages.find]

@@ -34,3 +34,12 @@ class SystemResponse(BaseModel):
 class NetworkResponse(BaseModel):
     bytes_sent: int
     bytes_recv: int
+    
+    
+class GPUResponse(BaseModel):
+    available: bool
+    name: str | None
+    usage: float | None
+    memory_used: int | None
+    memory_total: int | None
+    temperature_c: int | None

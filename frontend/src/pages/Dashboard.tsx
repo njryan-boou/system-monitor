@@ -3,6 +3,7 @@ import MemoryCard from "../components/MemoryCard";
 import DiskCard from "../components/DiskCard";
 import SystemCard from "../components/SystemCard";
 import NetworkCard from "../components/NetworkCard";
+import GPUCard from "../components/GPUCard";
 
 import usePolling from "../hooks/usePolling";
 
@@ -13,7 +14,8 @@ import {
     getMemoryUsage,
     getStorageInfo,
     getSystemInfo,
-    getNetworkInfo
+    getNetworkInfo,
+    getGPUInfo
 } from "../services/api";
 
 
@@ -33,12 +35,16 @@ export default function Dashboard() {
     const { data: network, error: networkError } =
         usePolling(getNetworkInfo, 1000);
 
+    const { data: gpu, error: gpuError } =
+        usePolling(getGPUInfo, 1000);
+
     const errors = [
         cpuError ? "CPU" : null,
         memoryError ? "Memory" : null,
         storageError ? "Storage" : null,
         systemError ? "System" : null,
-        networkError ? "Network" : null
+        networkError ? "Network" : null,
+        gpuError ? "GPU" : null
     ].filter(Boolean);
 
     return (
@@ -64,6 +70,7 @@ export default function Dashboard() {
                 <DiskCard storage={storage} />
                 <SystemCard system={system} />
                 <NetworkCard network={network} />
+                <GPUCard gpu={gpu} />
             </div>
 
             <footer className="dashboard-footer">

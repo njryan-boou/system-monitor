@@ -33,6 +33,15 @@ export interface NetworkCountersResponse {
     bytes_recv: number;
 }
 
+export interface GPUResponse {
+    available: boolean;
+    name: string | null;
+    usage: number | null;
+    memory_used: number | null;
+    memory_total: number | null;
+    temperature_c: number | null;
+}
+
 export interface NetworkResponse extends NetworkCountersResponse {
     download_bytes_per_sec: number;
     upload_bytes_per_sec: number;
@@ -74,6 +83,16 @@ export async function getSystemInfo(): Promise<SystemResponse> {
 
     if (!response.ok) {
         throw new Error("Failed to fetch system information");
+    }
+
+    return await response.json();
+}
+
+export async function getGPUInfo(): Promise<GPUResponse> {
+    const response = await fetch("/api/system/gpu");
+
+    if (!response.ok) {
+        throw new Error("Failed to fetch GPU information");
     }
 
     return await response.json();
