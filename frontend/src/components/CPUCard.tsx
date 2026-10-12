@@ -1,11 +1,12 @@
 import type { CPUResponse } from "../services/api";
 import { Cpu } from "lucide-react";
+import { memo } from "react";
 
 interface CPUCardProps {
     cpu: CPUResponse | null;
 }
 
-export default function CPUCard({ cpu }: CPUCardProps) {
+function CPUCard({ cpu }: CPUCardProps) {
     return (
         <section className="metric-card">
             <h2 className="card-title">
@@ -57,3 +58,5 @@ export default function CPUCard({ cpu }: CPUCardProps) {
         </section>
     );
 }
+
+export default memo(CPUCard);

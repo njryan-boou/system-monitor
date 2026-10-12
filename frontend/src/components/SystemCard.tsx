@@ -1,11 +1,12 @@
 import type { SystemResponse } from "../services/api";
 import { Monitor } from "lucide-react";
+import { memo } from "react";
 
 interface SystemCardProps {
     system: SystemResponse | null;
 }
 
-export default function SystemCard({ system }: SystemCardProps) {
+function SystemCard({ system }: SystemCardProps) {
     const formatUptime = (seconds: number): string => {
         const days = Math.floor(seconds / 86400);
         const hours = Math.floor((seconds % 86400) / 3600);
@@ -54,3 +55,5 @@ export default function SystemCard({ system }: SystemCardProps) {
         </section>
     );
 }
+
+export default memo(SystemCard);

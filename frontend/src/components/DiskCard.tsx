@@ -1,11 +1,12 @@
 import type { StorageResponse } from "../services/api";
 import { HardDrive } from "lucide-react";
+import { memo } from "react";
 
 interface DiskCardProps {
     storage: StorageResponse | null;
 }
 
-export default function DiskCard({ storage }: DiskCardProps) {
+function DiskCard({ storage }: DiskCardProps) {
     const toGiB = (bytes: number): string => {
         return (bytes / (1024 ** 3)).toFixed(1);
     };
@@ -57,3 +58,5 @@ export default function DiskCard({ storage }: DiskCardProps) {
         </section>
     );
 }
+
+export default memo(DiskCard);

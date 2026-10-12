@@ -1,11 +1,12 @@
 import type { MemoryResponse } from "../services/api";
 import { MemoryStick } from "lucide-react";
+import { memo } from "react";
 
 interface MemoryCardProps {
     memory: MemoryResponse | null;
 }
 
-export default function MemoryCard({ memory }: MemoryCardProps) {
+function MemoryCard({ memory }: MemoryCardProps) {
     const toGiB = (bytes: number): string => {
         return (bytes / (1024 ** 3)).toFixed(1);
     };
@@ -57,3 +58,5 @@ export default function MemoryCard({ memory }: MemoryCardProps) {
         </section>
     );
 }
+
+export default memo(MemoryCard);
