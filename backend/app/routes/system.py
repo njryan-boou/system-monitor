@@ -1,5 +1,7 @@
 from fastapi import APIRouter
 
+from typing import Literal
+
 from app.services.monitor import (
     get_cpu_info,
     get_memory_usage,
@@ -49,5 +51,7 @@ def network_info():
 
 
 @router.get("/gpu", response_model=GPUResponse)
-def gpu_info():
-    return get_gpu_info()
+def gpu_info(
+    vendor: Literal["nvidia", "amd"] | None = None
+):
+    return get_gpu_info(vendor)
