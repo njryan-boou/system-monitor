@@ -5,6 +5,7 @@ import time
 from functools import lru_cache
 from cpuinfo import get_cpu_info as get_cpu_details
 from app.services.cpu_cache import get_cpu_cache_info
+from app.services.memory_hardware import get_memory_hardware
 
 
 @lru_cache(maxsize=1)
@@ -92,6 +93,7 @@ def get_memory_usage() -> dict:
         "swap_used": swap.used,
         # A system with no configured swap has no meaningful swap percentage.
         "swap_percent": swap.percent if swap.total > 0 else None,
+        **get_memory_hardware(),
     }
 
 
