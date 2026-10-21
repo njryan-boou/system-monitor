@@ -16,6 +16,7 @@ import {
     getStorageDevices,
     getSystemInfo,
     getNetworkInfo,
+    getNetworkInterfaces,
     getGPUDevices
 } from "../services/api";
 
@@ -39,6 +40,9 @@ export default function Dashboard() {
     const { data: network, error: networkError } =
         usePolling(getNetworkInfo, 1000);
 
+    const { data: networkInterfaces, error: networkInterfacesError } =
+        usePolling(getNetworkInterfaces, 1000);
+
     const { data: gpus, error: gpuError } =
         usePolling(getGPUDevices, 1000);
 
@@ -47,7 +51,7 @@ export default function Dashboard() {
         memoryError ? "Memory" : null,
         storageError || storageDevicesError ? "Storage" : null,
         systemError ? "System" : null,
-        networkError ? "Network" : null,
+        networkError || networkInterfacesError ? "Network" : null,
         gpuError ? "GPU" : null
     ].filter(Boolean);
 
@@ -73,7 +77,7 @@ export default function Dashboard() {
                 <MemoryCard memory={memory} />
                 <DiskCard storage={storage} devices={storageDevices} />
                 <SystemCard system={system} />
-                <NetworkCard network={network} />
+                <NetworkCard network={network} interfaces={networkInterfaces} />
                 <GPUCard gpus={gpus} />
             </div>
 
