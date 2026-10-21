@@ -362,3 +362,25 @@
     background: #1e3a5f; border-color: #3b82f6; color: #dbeafe;
 }
 .memory-view-button:focus-visible { outline: 2px solid #60a5fa; outline-offset: 2px; }
+
+/* Fixed-height storage card with drive navigation */
+.storage-card { display: flex; flex-direction: column; height: 450px; }
+.storage-card-header { display: flex; align-items: center; justify-content: space-between; min-height: 34px; gap: 8px; }
+.storage-card-header .card-title { margin: 0 0 0 auto; }
+.storage-card-content { display: flex; flex: 1; flex-direction: column; min-height: 0; }
+.storage-device-name { min-height: 70px; overflow-wrap: anywhere; }
+.storage-primary-stat { min-height: 115px; }
+.storage-primary-stat .metric-primary { margin: 6px 0; font-size: 32px; }
+.storage-progress-slot { height: 10px; margin-top: 12px; }
+.storage-metric-details { margin-top: auto; padding-top: 12px; flex-shrink: 0; }
+.storage-metric-details .detail-row { min-height: 30px; align-items: center; }
+.storage-view-switch { display: flex; gap: 6px; margin-top: 16px; }
+.storage-view-button {
+    flex: 1; min-width: 0; padding: 8px 6px;
+    font: inherit; font-size: 12px; font-weight: 600;
+    border: 1px solid #293548; border-radius: 7px;
+    background: transparent; color: #94a3b8; cursor: pointer;
+}
+.storage-view-button:hover { background: #293548; color: #e5e7eb; }
+.storage-view-button.is-active { background: #1e3a5f; border-color: #3b82f6; color: #dbeafe; }
+.storage-view-button:focus-visible { outline: 2px solid #60a5fa; outline-offset: 2px; }
