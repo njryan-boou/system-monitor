@@ -8,6 +8,7 @@ no reliable per-GPU memory totals are exposed through these counters.
 from functools import lru_cache
 from pathlib import Path
 from threading import Lock
+import re
 
 from app.services.gpu_identity import identify_gpu
 
@@ -79,6 +80,43 @@ def get_gpu_clients(pci_address: str, proc_root: Path = PROC_ROOT) -> dict:
     return clients
 
 
+def read_client_resident_memory(pci_address: str, proc_root: Path = PROC_ROOT) -> int | None:
+    """Largest accessible Xe client's resident bytes; NOT whole-GPU memory.
+
+    xe fdinfo reports region residency in KiB (or bytes on some kernels).
+    Deduplicate each DRM client, and sum its separate memory regions.
+    Shared buffers may occur in several clients: do not sum across clients.
+    """
+    clients: dict[str, dict[str, int]] = {}
+    for fdinfo in proc_root.glob("[0-9]*/fdinfo/*"):
+        try:
+            fields = {}
+            for line in fdinfo.read_text().splitlines():
+                key, sep, value = line.partition(":")
+                if sep:
+                    fields[key.strip()] = value.strip()
+            if fields.get("drm-driver") != "xe" or fields.get("drm-pdev") != pci_address:
+                continue
+            client_id = fields.get("drm-client-id")
+            if not client_id or client_id in clients:
+                continue
+            regions: dict[str, int] = {}
+            for key, raw in fields.items():
+                if not (key == "drm-resident-system" or key.startswith("drm-resident-vram")):
+                    continue
+                match = re.fullmatch(r"(\\d+)\\s*(B|KiB|MiB|GiB)?", raw, re.I)
+                if not match:
+                    continue
+                units = (match.group(2) or "B").lower()
+                size = int(match.group(1)) * {"b": 1, "kib": 1024, "mib": 1024**2, "gib": 1024**3}[units]
+                regions[key] = size
+            if regions:
+                clients[client_id] = regions
+        except (OSError, UnicodeError):
+            continue
+    return max((sum(regions.values()) for regions in clients.values()), default=None)
+
+
 def calculate_peak_activity(previous: dict, current: dict) -> float | None:
     """Percent busy for the busiest comparable client/engine pair."""
     peak = None
@@ -139,7 +177,8 @@ def get_intel_gpu_info() -> dict | None:
         "gpu_type": gpu_type,
         "usage": usage,
         "usage_label": "Peak Client Engine Activity",
-        "memory_used": None,
+        "memory_used": read_client_resident_memory(device.name),
         "memory_total": None,
+        "memory_label": "Peak Client Resident Memory",
         "temperature_c": read_temperature(device),
     }
