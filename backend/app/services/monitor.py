@@ -107,11 +107,39 @@ def get_storage_info() -> dict:
 
 
 def get_system_info() -> dict:
+    """OS identity plus basic host metadata. Missing values stay unavailable."""
+    distro_name = distro_version = distro_id = None
+    if platform.system() == "Linux":
+        try:
+            info = platform.freedesktop_os_release()
+            distro_name = info.get("PRETTY_NAME") or info.get("NAME")
+            distro_version = info.get("VERSION_ID")
+            distro_id = info.get("ID")
+        except (OSError, ValueError):
+            pass
+
+    try:
+        boot_time = psutil.boot_time()
+        uptime = max(0, int(time.time() - boot_time))
+    except (OSError, RuntimeError):
+        boot_time = uptime = None
+
+    try:
+        process_count = len(psutil.pids())
+    except (OSError, RuntimeError, psutil.Error):
+        process_count = None
+
     return {
         "os": platform.system(),
         "os_release": platform.release(),
         "architecture": platform.machine(),
-        "uptime": int(time.time() - psutil.boot_time())
+        "uptime": uptime,
+        "distro_name": distro_name,
+        "distro_version": distro_version,
+        "distro_id": distro_id,
+        "hostname": platform.node() or None,
+        "boot_time": boot_time,
+        "process_count": process_count,
     }
     
     

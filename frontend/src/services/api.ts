@@ -54,7 +54,13 @@ export interface SystemResponse {
     os: string;
     os_release: string;
     architecture: string;
-    uptime: number;
+    uptime: number | null;
+    distro_name?: string | null;
+    distro_version?: string | null;
+    distro_id?: string | null;
+    hostname?: string | null;
+    boot_time?: number | null;
+    process_count?: number | null;
 }
 
 export interface NetworkCountersResponse {
