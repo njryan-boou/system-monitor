@@ -105,6 +105,13 @@ class SystemResponse(BaseModel):
     hostname: str | None = None
     boot_time: float | None = None
     process_count: int | None = None
+    motherboard_manufacturer: str | None = None
+    motherboard_model: str | None = None
+    motherboard_version: str | None = None
+    bios_vendor: str | None = None
+    bios_version: str | None = None
+    bios_release_date: str | None = None
+    boot_mode: Literal["UEFI", "Legacy"] | None = None
     
     
 class NetworkResponse(BaseModel):
