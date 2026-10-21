@@ -197,3 +197,5 @@
 .gpu-navigation button { display: inline-flex; align-items: center; justify-content: center; padding: 5px; background: transparent; color: #e5e7eb; border: 1px solid #293548; border-radius: 6px; cursor: pointer; }
 .gpu-navigation button:hover { background: #293548; }
 .gpu-navigation button:focus-visible { outline: 2px solid #60a5fa; outline-offset: 2px; }
+
+.gpu-type-label { display: inline-block; margin: 0 0 4px; color: #93c5fd; font-size: 12px; font-weight: 600; }

@@ -34,6 +34,7 @@ function GPUCard({ gpus }: GPUCardProps) {
             ) : (
                 <>
                     <p className="metric-lead">{gpu.name ?? "Graphics Processor"}</p>
+                    {gpu.gpu_type && <p className="gpu-type-label">{gpu.gpu_type === "integrated" ? "Integrated GPU" : "Dedicated GPU"}</p>}
                     <p className="metric-primary">{gpu.usage === null ? "N/A" : `${gpu.usage.toFixed(1)}%`}</p>
                     <p className="metric-lead">{gpu.usage_label ?? "GPU Utilization"}</p>
                     {gpu.usage !== null && <progress className="usage-progress" value={gpu.usage} max={100} aria-label={gpu.usage_label ?? "GPU utilization"} />}

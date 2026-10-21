@@ -61,6 +61,7 @@ def get_nvidia_gpu_info(index: int = 0) -> dict:
         return {
             "available": True,
             "name": gpu["name"],
+            "gpu_type": "dedicated" if gpu["name"].lower().startswith(("nvidia geforce rtx 5060", "nvidia geforce")) else None,
             "usage": utilization.gpu,
             "memory_used": memory.used,
             "memory_total": memory.total,
