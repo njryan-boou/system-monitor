@@ -10,6 +10,7 @@ needs root. Re-run after changing RAM and restart System Monitor.
 import json
 import os
 import sys
+import tempfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -32,10 +33,15 @@ def main() -> int:
     data = summarize_modules(modules, "snapshot")
     # Snapshot contains only memory generation, configured speed, capacity,
     # manufacturer and module slot. Serial/asset identifiers are excluded.
-    temp_path = SNAPSHOT_PATH.with_name(SNAPSHOT_PATH.name + ".tmp")
+    temp_path = None
     try:
-        descriptor = os.open(temp_path, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
-        with os.fdopen(descriptor, "w", encoding="utf-8") as stream:
+        # Random exclusive temporary file avoids following user-created symlinks
+        # when this optional command is executed with sudo.
+        with tempfile.NamedTemporaryFile(
+            mode="w", encoding="utf-8", dir=SNAPSHOT_PATH.parent,
+            prefix=".ram-snapshot-", delete=False,
+        ) as stream:
+            temp_path = Path(stream.name)
             json.dump(data, stream, indent=2)
             stream.write("\n")
         os.chmod(temp_path, 0o644)  # Readable by the ordinary backend user.
@@ -43,6 +49,9 @@ def main() -> int:
     except OSError as exc:
         print(f"Could not save local RAM snapshot: {exc}", file=sys.stderr)
         return 1
+    finally:
+        if temp_path is not None:
+            temp_path.unlink(missing_ok=True)
     print(f"Saved {len(modules)} installed RAM module(s) to {SNAPSHOT_PATH}")
     print("Restart System Monitor to pick up the snapshot.")
     return 0
