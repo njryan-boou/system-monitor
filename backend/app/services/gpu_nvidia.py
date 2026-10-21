@@ -58,7 +58,20 @@ def get_nvidia_gpu_info(index: int = 0) -> dict:
         except pynvml.NVMLError:
             temperature = None
 
+        def optional_nvml(call):
+            try:
+                return call()
+            except (pynvml.NVMLError, AttributeError):
+                return None
+
+        clock = optional_nvml(lambda: pynvml.nvmlDeviceGetClockInfo(handle, pynvml.NVML_CLOCK_GRAPHICS))
+        max_clock = optional_nvml(lambda: pynvml.nvmlDeviceGetMaxClockInfo(handle, pynvml.NVML_CLOCK_GRAPHICS))
+        power_mw = optional_nvml(lambda: pynvml.nvmlDeviceGetPowerUsage(handle))
+
         return {
+            "clock_mhz": clock,
+            "max_clock_mhz": max_clock,
+            "power_watts": round(power_mw / 1000, 2) if power_mw is not None else None,
             "available": True,
             "name": gpu["name"],
             "gpu_type": "dedicated" if gpu["name"].lower().startswith(("nvidia geforce rtx 5060", "nvidia geforce")) else None,
