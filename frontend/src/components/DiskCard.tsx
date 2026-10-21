@@ -16,7 +16,14 @@ function DiskCard({ storage, devices }: DiskCardProps) {
     const [selectedId, setSelectedId] = useState<string | null>(null);
     const [view, setView] = useState<View>("overview");
     const list = devices ?? [];
-    const index = Math.max(0, list.findIndex(disk => disk.id === selectedId));
+    // Open on the root filesystem's disk when available so the initial
+    // Overview can show a meaningful utilization percentage and progress bar.
+    // Once a user navigates, preserve that choice across polling updates.
+    const selectedIndex = list.findIndex(disk => disk.id === selectedId);
+    const rootIndex = list.findIndex(disk => disk.mountpoint === "/");
+    const mountedIndex = list.findIndex(disk => disk.volume_percent != null);
+    const defaultIndex = rootIndex >= 0 ? rootIndex : mountedIndex >= 0 ? mountedIndex : 0;
+    const index = selectedIndex >= 0 ? selectedIndex : defaultIndex;
     const disk = list[index];
     const overview = view === "overview";
     // Utilization is the selected filesystem's usage, not physical drive usage.
@@ -51,12 +58,12 @@ function DiskCard({ storage, devices }: DiskCardProps) {
                         <div className="storage-primary-stat">
                             <p className="metric-primary">
                                 {overview
-                                    ? hasVolumeUsage ? `${volumePercent.toFixed(1)}%` : size(disk?.capacity_bytes)
+                                    ? hasVolumeUsage ? `${volumePercent.toFixed(1)}%` : "N/A"
                                     : disk?.busy_percent == null ? "N/A" : `${disk.busy_percent.toFixed(1)}%`}
                             </p>
                             <p className="metric-lead" title={overview && disk && hasVolumeUsage ? "Usage of the mounted filesystem, not of the entire physical drive." : undefined}>
                                 {overview
-                                    ? hasVolumeUsage ? (disk ? "Mounted Volume Usage" : "Root Filesystem Usage") : "Physical Drive Capacity"
+                                    ? hasVolumeUsage ? (disk ? "Mounted Volume Usage" : "Root Filesystem Usage") : "Filesystem Usage Unavailable"
                                     : "Drive Busy Time"}
                             </p>
                             <div className="storage-progress-slot">
