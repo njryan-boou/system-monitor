@@ -14,6 +14,10 @@ export interface MemoryResponse {
     used: number;
     available: number;
     percent: number;
+    cached?: number | null;
+    swap_total?: number;
+    swap_used?: number;
+    swap_percent?: number | null;
 }
 
 export interface StorageResponse {

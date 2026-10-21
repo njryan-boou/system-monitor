@@ -72,13 +72,24 @@ def get_cpu_info() -> dict:
 
 
 def get_memory_usage() -> dict:
+    """RAM overview plus separate cache and swap information.
+
+    Cached memory is part of RAM accounting, not additional consumption.
+    Swap usage has its own denominator and is never presented as RAM usage.
+    """
     memory = psutil.virtual_memory()
+    swap = psutil.swap_memory()
 
     return {
         "total": memory.total,
         "used": memory.used,
         "available": memory.available,
-        "percent": memory.percent
+        "percent": memory.percent,
+        "cached": getattr(memory, "cached", None),
+        "swap_total": swap.total,
+        "swap_used": swap.used,
+        # A system with no configured swap has no meaningful swap percentage.
+        "swap_percent": swap.percent if swap.total > 0 else None,
     }
 
 
