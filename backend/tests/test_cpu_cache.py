@@ -43,6 +43,14 @@ def test_cache_shared_across_threads_is_not_double_counted(tmp_path):
     assert result["cache_l3_bytes"] == 24 * 1024 ** 2
     assert result["cache_l3_groups"] == 2
     assert result["cache_l1_unified_bytes"] is None
+    assert result["cache_instances"] == [
+        {"level": 1, "kind": "Data", "size_bytes": 32768, "count": 1},
+        {"level": 1, "kind": "Data", "size_bytes": 49152, "count": 1},
+        {"level": 1, "kind": "Instruction", "size_bytes": 32768, "count": 1},
+        {"level": 2, "kind": "Unified", "size_bytes": 1024 ** 2, "count": 1},
+        {"level": 3, "kind": "Unified", "size_bytes": 8 * 1024 ** 2, "count": 1},
+        {"level": 3, "kind": "Unified", "size_bytes": 16 * 1024 ** 2, "count": 1},
+    ]
 
     # Distinct cache groups are counted once even across repeated polls.
     assert cpu_cache.get_cpu_cache_info(tmp_path) == result
@@ -53,12 +61,14 @@ def test_unavailable_cache_is_not_invented(tmp_path):
     entry(tmp_path, 0, 0, 1, "Data", "32K", "invalid")
     entry(tmp_path, 0, 1, 3, "Unified", "unknown", "0")
     data = cpu_cache.get_cpu_cache_info(tmp_path)
-    assert all(value is None for value in data.values())
+    assert all(value is None for key, value in data.items() if key != "cache_instances")
+    assert data["cache_instances"] == []
     validated = CPUResponse(
         name="Test CPU", usage=10.0, physical_cores=1, logical_cores=2,
         frequency_mhz=None, **data,
     )
     assert validated.cache_l3_bytes is None
+    assert validated.cache_instances == []
     cpu_cache.get_cpu_cache_info.cache_clear()
 
 
@@ -69,4 +79,20 @@ def test_l1_unified_and_l2_data(tmp_path):
     data = cpu_cache.get_cpu_cache_info(tmp_path)
     assert data["cache_l1_unified_bytes"] == 65536
     assert data["cache_l2_bytes"] == 1024 ** 2
+    assert data["cache_instances"] == [
+        {"level": 1, "kind": "Unified", "size_bytes": 65536, "count": 1},
+        {"level": 2, "kind": "Data", "size_bytes": 512 * 1024, "count": 1},
+        {"level": 2, "kind": "Instruction", "size_bytes": 512 * 1024, "count": 1},
+    ]
+    cpu_cache.get_cpu_cache_info.cache_clear()
+
+
+def test_same_sized_distinct_l2_instances_are_grouped(tmp_path):
+    for cpu in (0, 1, 2):
+        entry(tmp_path, cpu, 0, 2, "Unified", "1M", str(cpu))
+    data = cpu_cache.get_cpu_cache_info(tmp_path)
+    assert data["cache_l2_bytes"] == 3 * 1024 ** 2
+    assert data["cache_instances"] == [
+        {"level": 2, "kind": "Unified", "size_bytes": 1024 ** 2, "count": 3},
+    ]
     cpu_cache.get_cpu_cache_info.cache_clear()
