@@ -111,3 +111,15 @@ def test_memory_api_remains_compatible(monkeypatch):
     assert response.percent == 25.0
     assert response.memory_module_count == 1
     assert response.memory_modules[0].manufacturer == "Corsair"
+
+
+def test_rejects_invalid_snapshot(tmp_path, monkeypatch):
+    snapshot = tmp_path / "memory.json"
+    monkeypatch.setattr(hardware, "SNAPSHOT_PATH", snapshot)
+    monkeypatch.setattr(hardware, "read_dmi_memory_modules", lambda: None)
+    snapshot.write_text(json.dumps({"memory_modules": [
+        {"slot": "A1", "capacity_bytes": -1, "memory_type": "DDR5"}
+    ]}))
+    hardware.get_memory_hardware.cache_clear()
+    assert hardware.get_memory_hardware() == hardware.unavailable()
+    hardware.get_memory_hardware.cache_clear()
