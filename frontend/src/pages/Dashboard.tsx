@@ -15,7 +15,7 @@ import {
     getStorageInfo,
     getSystemInfo,
     getNetworkInfo,
-    getGPUInfo
+    getGPUDevices
 } from "../services/api";
 
 
@@ -35,8 +35,8 @@ export default function Dashboard() {
     const { data: network, error: networkError } =
         usePolling(getNetworkInfo, 1000);
 
-    const { data: gpu, error: gpuError } =
-        usePolling(getGPUInfo, 1000);
+    const { data: gpus, error: gpuError } =
+        usePolling(getGPUDevices, 1000);
 
     const errors = [
         cpuError ? "CPU" : null,
@@ -70,7 +70,7 @@ export default function Dashboard() {
                 <DiskCard storage={storage} />
                 <SystemCard system={system} />
                 <NetworkCard network={network} />
-                <GPUCard gpu={gpu} />
+                <GPUCard gpus={gpus} />
             </div>
 
             <footer className="dashboard-footer">
