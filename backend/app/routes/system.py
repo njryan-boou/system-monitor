@@ -10,6 +10,7 @@ from app.services.monitor import (
     get_network_info
 )
 
+from app.services.network_interfaces import get_network_interfaces
 from app.services.storage_devices import get_storage_devices
 
 from app.services.gpu import get_gpu_info, get_gpu_infos
@@ -21,6 +22,7 @@ from app.schemas.system import (
     StorageDeviceResponse,
     SystemResponse,
     NetworkResponse,
+    NetworkInterfaceResponse,
     GPUResponse,
     GPUDeviceResponse
 )
@@ -57,6 +59,11 @@ def system_info():
 @router.get("/network", response_model=NetworkResponse)
 def network_info():
     return get_network_info()
+
+
+@router.get("/network/interfaces", response_model=list[NetworkInterfaceResponse])
+def network_interfaces():
+    return get_network_interfaces()
 
 
 @router.get("/gpu", response_model=GPUResponse)
