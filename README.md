@@ -81,11 +81,22 @@ not provide module details, in which case values remain unavailable.
 
 ### Storage Monitoring
 
-- Filesystem mount point
-- Total storage capacity
-- Used storage
-- Available storage
-- Storage utilization percentage
+- Physical drive selection with Overview, Performance, and Partitions views
+- Filesystem mount point and utilization where mounted
+- Total storage capacity, used space and available space
+- Physical-drive I/O throughput and busy time
+- Linux partition list per physical drive, including unmounted partitions
+- Partition capacity, filesystem type and all reported mount points
+
+The Storage **Partitions** view uses the read-only `lsblk` command provided
+by util-linux on Linux. It polls partition layout every 10 seconds rather than
+every second like disk I/O. It **does not** mount, format or change drives,
+and requires no `sudo`. Partitions are displayed even without a mounted
+filesystem; a partition's size is its block-device capacity, not its
+filesystem's used space. Btrfs partitions with multiple subvolume mount points
+show each reported mount point. If `lsblk` is unavailable (for example on
+non-Linux platforms), the view reports that partition information is
+unavailable without affecting existing disk monitoring.
 
 ### System Information
 
