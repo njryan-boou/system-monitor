@@ -44,10 +44,11 @@ refreshing measurements.
 ### GPU Monitoring
 
 - Choose detected NVIDIA, AMD and Intel GPUs with the card's top-left arrows
-- **Overview:** GPU usage, memory and temperature
-- **Performance:** graphics clock, maximum clock, GPU power and memory clock
+- **Overview:** GPU utilization, temperature, power draw and integrated/dedicated GPU type
+- **Performance:** current graphics clock, maximum graphics clock,
+  memory clock and current clock relative to reported maximum
 - **Memory:** GPU memory utilization (where capacity is actually reported),
-  memory used, memory available, memory capacity and memory clock
+  memory used, memory available and memory capacity
 
 For NVIDIA cards, GPU memory comes from NVML; AMD uses the driver's
 `mem_info_vram_*` values. On AMD integrated GPUs this measures a reported
@@ -60,6 +61,8 @@ client's resident memory**, which is *not* total VRAM usage. Its Memory
 view therefore shows that per-client measurement, but no whole-GPU
 utilization percentage or fabricated available/capacity value.
 Unsupported memory clocks and counters are displayed as `N/A`.
+The **Clock vs Max** figure on Performance compares reported clock frequencies;
+it is not a measure of GPU compute utilization.
 
 ### Memory Monitoring
 
