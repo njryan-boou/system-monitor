@@ -28,6 +28,28 @@ export interface StorageResponse {
     percent: number;
 }
 
+export interface StorageDeviceResponse {
+    id: string;
+    name: string;
+    device: string;
+    media_type: "SSD" | "HDD" | null;
+    capacity_bytes: number | null;
+    mountpoint: string | null;
+    volume_total: number | null;
+    volume_used: number | null;
+    volume_free: number | null;
+    volume_percent: number | null;
+    read_bytes_per_sec: number | null;
+    write_bytes_per_sec: number | null;
+    busy_percent: number | null;
+}
+
+export async function getStorageDevices(): Promise<StorageDeviceResponse[]> {
+    const response = await fetch("/api/system/storage/devices");
+    if (!response.ok) throw new Error("Failed to fetch storage devices");
+    return response.json();
+}
+
 export interface SystemResponse {
     os: string;
     os_release: string;
