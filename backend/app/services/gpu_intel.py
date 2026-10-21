@@ -83,7 +83,8 @@ def get_gpu_clients(pci_address: str, proc_root: Path = PROC_ROOT) -> dict:
 def read_client_resident_memory(pci_address: str, proc_root: Path = PROC_ROOT) -> int | None:
     """Largest accessible Xe client's resident bytes; NOT whole-GPU memory.
 
-    xe fdinfo reports region residency in KiB (or bytes on some kernels).
+    Xe fdinfo reports residency separately for system, GTT, stolen and VRAM
+    regions, using KiB, MiB, bytes or (for zero) no unit.
     Deduplicate each DRM client, and sum its separate memory regions.
     Shared buffers may occur in several clients: do not sum across clients.
     """
@@ -102,7 +103,7 @@ def read_client_resident_memory(pci_address: str, proc_root: Path = PROC_ROOT) -
                 continue
             regions: dict[str, int] = {}
             for key, raw in fields.items():
-                if not (key == "drm-resident-system" or key.startswith("drm-resident-vram")):
+                if not re.fullmatch(r"drm-resident-(?:system|gtt|stolen|vram[0-9]+)", key):
                     continue
                 match = re.fullmatch(r"(\d+)\s*(B|KiB|MiB|GiB)?", raw, re.I)
                 if not match:
@@ -179,6 +180,6 @@ def get_intel_gpu_info() -> dict | None:
         "usage_label": "Peak Client Engine Activity",
         "memory_used": read_client_resident_memory(device.name),
         "memory_total": None,
-        "memory_label": "Peak Client Resident Memory",
+        "memory_label": "Largest Client Resident Memory",
         "temperature_c": read_temperature(device),
     }
