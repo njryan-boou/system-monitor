@@ -43,6 +43,11 @@ export interface GPUResponse {
     usage_label?: string | null;
 }
 
+export interface GPUDeviceResponse extends GPUResponse {
+    id: string;
+    vendor: "nvidia" | "amd" | "intel";
+}
+
 export interface NetworkResponse extends NetworkCountersResponse {
     download_bytes_per_sec: number;
     upload_bytes_per_sec: number;
@@ -86,6 +91,12 @@ export async function getSystemInfo(): Promise<SystemResponse> {
         throw new Error("Failed to fetch system information");
     }
 
+    return await response.json();
+}
+
+export async function getGPUDevices(): Promise<GPUDeviceResponse[]> {
+    const response = await fetch("/api/system/gpus");
+    if (!response.ok) throw new Error("Failed to fetch GPU devices");
     return await response.json();
 }
 

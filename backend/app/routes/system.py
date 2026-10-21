@@ -10,7 +10,7 @@ from app.services.monitor import (
     get_network_info
 )
 
-from app.services.gpu import get_gpu_info
+from app.services.gpu import get_gpu_info, get_gpu_infos
 
 from app.schemas.system import (
     CPUResponse,
@@ -18,7 +18,8 @@ from app.schemas.system import (
     StorageResponse,
     SystemResponse,
     NetworkResponse,
-    GPUResponse
+    GPUResponse,
+    GPUDeviceResponse
 )
 
 
@@ -55,3 +56,7 @@ def gpu_info(
     vendor: Literal["nvidia", "amd", "intel"] | None = None
 ):
     return get_gpu_info(vendor)
+
+@router.get("/gpus", response_model=list[GPUDeviceResponse])
+def gpu_devices():
+    return get_gpu_infos()
