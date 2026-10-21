@@ -15,3 +15,4 @@ dist/
 # Local sanitized DMI memory snapshot (host-specific)
 backend/.memory-hardware.json
 backend/.memory-hardware.json.tmp
+backend/.ram-snapshot-*
