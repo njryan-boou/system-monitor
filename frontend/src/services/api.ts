@@ -42,6 +42,9 @@ export interface GPUResponse {
     temperature_c: number | null;
     usage_label?: string | null;
     memory_label?: string | null;
+    clock_mhz?: number | null;
+    max_clock_mhz?: number | null;
+    power_watts?: number | null;
     gpu_type?: "integrated" | "dedicated" | null;
 }
 
