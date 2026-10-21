@@ -46,6 +46,7 @@ class GPUResponse(BaseModel):
     memory_total: int | None
     temperature_c: int | None
     usage_label: str | None = None
+    gpu_type: Literal["integrated", "dedicated"] | None = None
 
 class GPUDeviceResponse(GPUResponse):
     id: str
