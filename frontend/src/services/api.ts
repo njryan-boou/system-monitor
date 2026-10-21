@@ -41,6 +41,7 @@ export interface GPUResponse {
     memory_total: number | null;
     temperature_c: number | null;
     usage_label?: string | null;
+    gpu_type?: "integrated" | "dedicated" | null;
 }
 
 export interface GPUDeviceResponse extends GPUResponse {
