@@ -228,6 +228,36 @@ Windows, Linux, and macOS.
 Some hardware metrics may vary depending on the operating system,
 hardware, drivers, and permissions.
 
+### Automated Linux Setup (Ubuntu/Debian)
+
+On Ubuntu and Debian, the bootstrap script installs system prerequisites
+(Python 3, venv, pip, build tools, Git, curl, and certificates), checks
+for a Vite-compatible Node.js/npm installation, and then runs the existing
+project setup (Python environment, npm packages, and frontend build).
+
+```bash
+git clone https://github.com/njryan-boou/system-monitor.git
+cd system-monitor
+bash scripts/install-system-deps.sh
+bash scripts/run.sh
+```
+
+The script requests sudo for operating-system packages only. If Node.js
+is missing or incompatible, it configures the NodeSource signed apt
+repository for Node.js 24; inspect the script and repository change before
+running it. Existing compatible Node.js installations are left alone.
+
+For Linux executable builds, optionally install PyInstaller as well:
+
+```bash
+bash scripts/install-system-deps.sh --with-pyinstaller
+bash scripts/build-linux.sh
+```
+
+This bootstrap currently supports Ubuntu/Debian apt systems on amd64
+or arm64 when Node.js needs installing. The standalone executable does
+**not** require Node.js, npm, or Python to be installed by end users.
+
 ### 1. Clone the Repository
 
 ```bash
