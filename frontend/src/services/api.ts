@@ -77,6 +77,30 @@ export async function getStorageDevices(): Promise<StorageDeviceResponse[]> {
     return response.json();
 }
 
+export interface StoragePartitionResponse {
+    name: string;
+    device: string;
+    size_bytes: number | null;
+    filesystem: string | null;
+    mountpoints: string[];
+}
+
+export interface StorageDrivePartitionsResponse {
+    disk_id: string;
+    partitions: StoragePartitionResponse[];
+}
+
+export interface StoragePartitionsResponse {
+    available: boolean;
+    drives: StorageDrivePartitionsResponse[];
+}
+
+export async function getStoragePartitions(): Promise<StoragePartitionsResponse> {
+    const response = await fetch("/api/system/storage/partitions");
+    if (!response.ok) throw new Error("Failed to fetch storage partitions");
+    return response.json();
+}
+
 export interface SystemResponse {
     os: string;
     os_release: string;
