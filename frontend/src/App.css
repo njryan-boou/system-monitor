@@ -445,3 +445,36 @@
 .network-view-button:hover { background: #293548; color: #e5e7eb; }
 .network-view-button.is-active { background: #1e3a5f; border-color: #3b82f6; color: #dbeafe; }
 .network-view-button:focus-visible { outline: 2px solid #60a5fa; outline-offset: 2px; }
+
+/* System Overview and Details */
+.system-card { display: flex; flex-direction: column; height: 450px; min-width: 0; }
+.system-card .card-title { flex-shrink: 0; }
+.system-card-content { display: flex; flex: 1 1 auto; flex-direction: column; min-height: 0; min-width: 0; }
+.system-identity { flex: 0 0 56px; }
+.system-primary-stat { flex: 0 0 112px; min-width: 0; overflow: hidden; }
+.system-primary-stat .metric-primary {
+    margin: 6px 0; font-size: clamp(22px, 2.4vw, 32px);
+    line-height: 1.25; display: -webkit-box;
+    -webkit-box-orient: vertical; -webkit-line-clamp: 2;
+    line-clamp: 2; overflow: hidden; overflow-wrap: anywhere;
+}
+.system-metric-details {
+    margin-top: 8px; padding-top: 12px; flex: 1 1 auto;
+    min-height: 0; min-width: 0; overflow-y: auto; overflow-x: hidden;
+    scrollbar-width: thin; scrollbar-color: #475569 transparent;
+}
+.system-metric-details .detail-row {
+    display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
+    align-items: start; gap: 8px; padding: 7px 4px 7px 0;
+}
+.system-metric-details .detail-row dt,
+.system-metric-details .detail-row dd { min-width: 0; overflow-wrap: anywhere; }
+.system-view-switch { display: flex; flex: 0 0 auto; gap: 6px; margin-top: 12px; }
+.system-view-button {
+    flex: 1; min-width: 0; padding: 8px 6px; font: inherit;
+    font-size: 12px; font-weight: 600; border: 1px solid #293548;
+    border-radius: 7px; background: transparent; color: #94a3b8; cursor: pointer;
+}
+.system-view-button:hover { background: #293548; color: #e5e7eb; }
+.system-view-button.is-active { background: #1e3a5f; border-color: #3b82f6; color: #dbeafe; }
+.system-view-button:focus-visible { outline: 2px solid #60a5fa; outline-offset: 2px; }
