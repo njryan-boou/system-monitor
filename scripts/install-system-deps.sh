@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Bootstrap an Ubuntu/Debian development or build machine for System Monitor.
+# Bootstrap Fedora and Ubuntu/Debian development or build machines for System Monitor.
 # Run as a regular user: bash scripts/install-system-deps.sh
 set -euo pipefail
 
@@ -24,10 +24,21 @@ case "$#" in
     *) usage >&2; exit 2 ;;
 esac
 
-if [[ "$(uname -s)" != "Linux" ]] || [[ ! -f /etc/debian_version ]] ||
-   ! command -v apt-get >/dev/null 2>&1; then
-    echo "Error: This installer supports Ubuntu/Debian-based Linux with apt." >&2
-    echo "On other platforms, install Python 3.10+, Node.js 20.19+/22.12+, npm, and Git manually." >&2
+if [[ "$(uname -s)" != "Linux" ]] || [[ ! -r /etc/os-release ]]; then
+    echo "Error: This installer requires a supported Linux distribution." >&2
+    exit 1
+fi
+
+# Identify Fedora explicitly; keep Ubuntu/Debian on the original apt path.
+# shellcheck source=/etc/os-release
+. /etc/os-release
+if [[ "${ID:-}" == "fedora" ]] && command -v dnf >/dev/null 2>&1; then
+    PACKAGE_MANAGER="dnf"
+elif [[ -f /etc/debian_version ]] && command -v apt-get >/dev/null 2>&1; then
+    PACKAGE_MANAGER="apt"
+else
+    echo "Error: Supported systems are Fedora (dnf) and Ubuntu/Debian (apt)." >&2
+    echo "Install Python 3.10+, a Vite-compatible Node.js, npm, and Git manually on other systems." >&2
     exit 1
 fi
 
@@ -52,18 +63,24 @@ node_compatible() {
     major="${BASH_REMATCH[1]}"
     minor="${BASH_REMATCH[2]}"
 
-    # Vite 8: Node 20.19+, 22.12+, or a newer release.
-    (( major > 22 || (major == 22 && minor >= 12) ||
+    # Vite 8: Node 20.19+, 22.12+, or 24+ (not Node 21 or 23).
+    (( major >= 24 || (major == 22 && minor >= 12) ||
        (major == 20 && minor >= 19) ))
 }
 
 echo "Installing System Monitor system prerequisites..."
-echo "This step updates apt package indexes and may ask for your sudo password."
+echo "This step may ask for your sudo password and install system packages."
 sudo -v
-sudo apt-get update
-sudo apt-get install -y \
-    python3 python3-venv python3-pip python3-dev \
-    build-essential git curl ca-certificates gnupg
+if [[ "$PACKAGE_MANAGER" == "apt" ]]; then
+    sudo apt-get update
+    sudo apt-get install -y \
+        python3 python3-venv python3-pip python3-dev \
+        build-essential git curl ca-certificates gnupg
+else
+    sudo dnf install -y \
+        python3 python3-pip python3-devel \
+        gcc gcc-c++ make git curl ca-certificates
+fi
 
 if ! python3 -c 'import sys; assert sys.version_info >= (3, 10)' 2>/dev/null; then
     echo "Error: System Monitor requires Python 3.10 or newer." >&2
@@ -75,9 +92,14 @@ if node_compatible; then
     echo "Using existing Node.js $(node --version) and npm $(npm --version)."
 else
     echo "Node.js/npm missing or too old for Vite 8."
-    echo "Installing Node.js 24.x from the NodeSource signed apt repository..."
+    if [[ "$PACKAGE_MANAGER" == "dnf" ]]; then
+        # Fedora's nodejs package includes npm; use its official repository.
+        echo "Installing Node.js and npm from Fedora repositories..."
+        sudo dnf install -y nodejs
+    else
+        echo "Installing Node.js 24.x from the NodeSource signed apt repository..."
 
-    arch="$(dpkg --print-architecture)"
+        arch="$(dpkg --print-architecture)"
     case "$arch" in
         amd64|arm64) ;;
         *)
@@ -105,13 +127,17 @@ else
     printf 'Types: deb\nURIs: https://deb.nodesource.com/node_24.x\nSuites: nodistro\nComponents: main\nArchitectures: %s\nSigned-By: /usr/share/keyrings/nodesource.gpg\n' "$arch" |
         sudo tee /etc/apt/sources.list.d/nodesource.sources >/dev/null
 
-    sudo apt-get update
-    sudo apt-get install -y nodejs
+        sudo apt-get update
+        sudo apt-get install -y nodejs
+    fi
 fi
 
 if ! node_compatible; then
     echo "Error: A compatible Node.js and npm installation was not found after setup." >&2
     echo "Check PATH, node --version, and npm --version." >&2
+    if [[ "$PACKAGE_MANAGER" == "dnf" ]]; then
+        echo "If Fedora's default nodejs is too old, install a supported Fedora Node.js stream (e.g. nodejs24) and select its node/npm binaries." >&2
+    fi
     exit 1
 fi
 
