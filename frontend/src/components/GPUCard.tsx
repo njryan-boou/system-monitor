@@ -47,14 +47,16 @@ function GPUCard({ gpus }: GPUCardProps) {
     // memory, not whole-device memory. Never derive VRAM capacity or utilization
     // from such samples (nor from a missing/invalid memory_total).
     const clientResident = Boolean(gpu?.memory_label);
+    const memoryUsed = gpu?.memory_used;
+    const memoryTotal = gpu?.memory_total;
     const hasDeviceMemory = !clientResident &&
-        validBytes(gpu?.memory_used) && validBytes(gpu?.memory_total) &&
-        gpu.memory_total > 0 && gpu.memory_used <= gpu.memory_total;
-    const memoryPercent = hasDeviceMemory && gpu
-        ? 100 * (gpu.memory_used! / gpu.memory_total!)
+        validBytes(memoryUsed) && validBytes(memoryTotal) &&
+        memoryTotal > 0 && memoryUsed <= memoryTotal;
+    const memoryPercent = hasDeviceMemory
+        ? 100 * (memoryUsed! / memoryTotal!)
         : null;
-    const memoryFree = hasDeviceMemory && gpu
-        ? gpu.memory_total! - gpu.memory_used!
+    const memoryFree = hasDeviceMemory
+        ? memoryTotal! - memoryUsed!
         : null;
 
     return (
@@ -98,9 +100,7 @@ function GPUCard({ gpus }: GPUCardProps) {
                                         ? activeClock == null ? "N/A" : `${activeClock.toFixed(0)} MHz`
                                         : memoryPercent !== null
                                             ? `${memoryPercent.toFixed(1)}%`
-                                            : clientResident
-                                                ? toResidentMemory(gpu.memory_used)
-                                                : toResidentMemory(gpu.memory_used)}
+                                            : toResidentMemory(gpu.memory_used)}
                             </p>
                             <p className="metric-lead">
                                 {overview
