@@ -41,6 +41,26 @@ refreshing measurements.
 - Logical processor count
 - Current CPU frequency
 
+### GPU Monitoring
+
+- Choose detected NVIDIA, AMD and Intel GPUs with the card's top-left arrows
+- **Overview:** GPU usage, memory and temperature
+- **Performance:** graphics clock, maximum clock, GPU power and memory clock
+- **Memory:** GPU memory utilization (where capacity is actually reported),
+  memory used, memory available, memory capacity and memory clock
+
+For NVIDIA cards, GPU memory comes from NVML; AMD uses the driver's
+`mem_info_vram_*` values. On AMD integrated GPUs this measures a reported
+VRAM region, **not all system RAM available for graphics**. The Memory view
+shows a utilization percentage and progress bar only when the reported
+used and total memory form a valid device-level measurement.
+
+The Intel Xe backend currently reports **the largest accessible DRM
+client's resident memory**, which is *not* total VRAM usage. Its Memory
+view therefore shows that per-client measurement, but no whole-GPU
+utilization percentage or fabricated available/capacity value.
+Unsupported memory clocks and counters are displayed as `N/A`.
+
 ### Memory Monitoring
 
 - Total system memory
