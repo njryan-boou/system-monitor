@@ -53,7 +53,13 @@ class SystemResponse(BaseModel):
     os: str
     os_release: str
     architecture: str
-    uptime: int
+    uptime: int | None
+    distro_name: str | None = None
+    distro_version: str | None = None
+    distro_id: str | None = None
+    hostname: str | None = None
+    boot_time: float | None = None
+    process_count: int | None = None
     
     
 class NetworkResponse(BaseModel):
