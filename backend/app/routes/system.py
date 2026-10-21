@@ -12,6 +12,7 @@ from app.services.monitor import (
 
 from app.services.network_interfaces import get_network_interfaces
 from app.services.storage_devices import get_storage_devices
+from app.services.storage_partitions import get_storage_partitions
 
 from app.services.gpu import get_gpu_info, get_gpu_infos
 
@@ -20,6 +21,7 @@ from app.schemas.system import (
     MemoryResponse,
     StorageResponse,
     StorageDeviceResponse,
+    StoragePartitionsResponse,
     SystemResponse,
     NetworkResponse,
     NetworkInterfaceResponse,
@@ -49,6 +51,11 @@ def storage_info():
 @router.get("/storage/devices", response_model=list[StorageDeviceResponse])
 def storage_devices():
     return get_storage_devices()
+
+
+@router.get("/storage/partitions", response_model=StoragePartitionsResponse)
+def storage_partitions():
+    return get_storage_partitions()
 
 
 @router.get("/info", response_model=SystemResponse)
