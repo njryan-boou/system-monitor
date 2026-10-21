@@ -122,11 +122,6 @@ def get_intel_gpu_info() -> dict | None:
     if device is None:
         return None
 
-    try:
-        device_id = (device / "device").read_text().strip().lower()
-    except OSError:
-        device_id = None
-
     name, gpu_type = identify_gpu("intel", device)
 
     with _sample_lock:
