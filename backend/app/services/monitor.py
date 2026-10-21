@@ -4,6 +4,7 @@ import platform
 import time
 from functools import lru_cache
 from cpuinfo import get_cpu_info as get_cpu_details
+from app.services.cpu_cache import get_cpu_cache_info
 
 
 @lru_cache(maxsize=1)
@@ -68,6 +69,7 @@ def get_cpu_info() -> dict:
         "per_logical_cpu_usage": psutil.cpu_percent(interval=None, percpu=True),
         "temperature_c": get_cpu_temperature(),
         "load_average_1m": get_cpu_load_average(),
+        **get_cpu_cache_info(),
     }
 
 
