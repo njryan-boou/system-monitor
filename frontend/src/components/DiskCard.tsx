@@ -1,24 +1,23 @@
-import type { StorageDeviceResponse, StorageResponse } from "../services/api";
+import type { StorageDeviceResponse, StorageResponse, StoragePartitionsResponse } from "../services/api";
 import { HardDrive, ChevronLeft, ChevronRight } from "lucide-react";
 import { memo, useState } from "react";
 
 interface DiskCardProps {
     storage: StorageResponse | null;
     devices: StorageDeviceResponse[] | null;
+    partitions: StoragePartitionsResponse | null;
 }
-type View = "overview" | "performance";
+type View = "overview" | "performance" | "partitions";
 const size = (bytes: number | null | undefined) =>
     bytes == null ? "N/A" : `${(bytes / 1024 ** 3).toFixed(1)} GiB`;
 const rate = (bytes: number | null | undefined) =>
     bytes == null ? "N/A" : `${(bytes / 1024 ** 2).toFixed(1)} MiB/s`;
 
-function DiskCard({ storage, devices }: DiskCardProps) {
+function DiskCard({ storage, devices, partitions }: DiskCardProps) {
     const [selectedId, setSelectedId] = useState<string | null>(null);
     const [view, setView] = useState<View>("overview");
     const list = devices ?? [];
-    // Open on the root filesystem's disk when available so the initial
-    // Overview can show a meaningful utilization percentage and progress bar.
-    // Once a user navigates, preserve that choice across polling updates.
+    // Prefer root filesystem on initial load; remember manual drive selection.
     const selectedIndex = list.findIndex(disk => disk.id === selectedId);
     const rootIndex = list.findIndex(disk => disk.mountpoint === "/");
     const mountedIndex = list.findIndex(disk => disk.volume_percent != null);
@@ -26,9 +25,12 @@ function DiskCard({ storage, devices }: DiskCardProps) {
     const index = selectedIndex >= 0 ? selectedIndex : defaultIndex;
     const disk = list[index];
     const overview = view === "overview";
-    // Utilization is the selected filesystem's usage, not physical drive usage.
+    const performance = view === "performance";
+    // Utilization is a selected mounted filesystem's usage, not physical drive usage.
     const volumePercent = disk ? disk.volume_percent : storage?.percent;
     const hasVolumeUsage = volumePercent != null && Number.isFinite(volumePercent);
+    const partitionList = partitions?.drives.find(drive => drive.disk_id === disk?.id)?.partitions ?? [];
+    const partitionReady = partitions !== null && partitions.available;
 
     const select = (offset: number) => {
         if (!list.length) return;
@@ -59,12 +61,14 @@ function DiskCard({ storage, devices }: DiskCardProps) {
                             <p className="metric-primary">
                                 {overview
                                     ? hasVolumeUsage ? `${volumePercent.toFixed(1)}%` : "N/A"
-                                    : disk?.busy_percent == null ? "N/A" : `${disk.busy_percent.toFixed(1)}%`}
+                                    : performance
+                                        ? disk?.busy_percent == null ? "N/A" : `${disk.busy_percent.toFixed(1)}%`
+                                        : partitions === null ? "..." : !partitionReady || !disk ? "N/A" : partitionList.length}
                             </p>
                             <p className="metric-lead" title={overview && disk && hasVolumeUsage ? "Usage of the mounted filesystem, not of the entire physical drive." : undefined}>
                                 {overview
                                     ? hasVolumeUsage ? (disk ? "Mounted Volume Usage" : "Root Filesystem Usage") : "Filesystem Usage Unavailable"
-                                    : "Drive Busy Time"}
+                                    : performance ? "Drive Busy Time" : "Partitions on Selected Drive"}
                             </p>
                             <div className="storage-progress-slot">
                                 {overview && hasVolumeUsage && <progress
@@ -73,7 +77,7 @@ function DiskCard({ storage, devices }: DiskCardProps) {
                                     max={100}
                                     aria-label={disk ? "Selected mounted filesystem utilization" : "Root filesystem utilization"}
                                 />}
-                                {!overview && disk?.busy_percent != null &&
+                                {performance && disk?.busy_percent != null &&
                                     <progress className="usage-progress" value={disk.busy_percent} max={100} aria-label="Drive busy time"/>}
                             </div>
                         </div>
@@ -86,20 +90,40 @@ function DiskCard({ storage, devices }: DiskCardProps) {
                                     <div className="detail-row"><dt>Volume Total</dt><dd>{size(disk ? disk.volume_total : storage.total)}</dd></div>
                                     {disk && <div className="detail-row"><dt>Drive Capacity</dt><dd>{size(disk.capacity_bytes)}</dd></div>}
                                 </>
-                            ) : (
+                            ) : performance ? (
                                 <>
                                     <div className="detail-row"><dt>Read Speed</dt><dd>{rate(disk?.read_bytes_per_sec)}</dd></div>
                                     <div className="detail-row"><dt>Write Speed</dt><dd>{rate(disk?.write_bytes_per_sec)}</dd></div>
                                     <div className="detail-row"><dt>Device</dt><dd>{disk?.device ?? "N/A"}</dd></div>
                                 </>
+                            ) : !partitionReady ? (
+                                <div className="detail-row"><dt>Partition data</dt><dd>{partitions === null ? "Loading..." : "Unavailable on this system"}</dd></div>
+                            ) : partitionList.length === 0 ? (
+                                <div className="detail-row"><dt>Partitions</dt><dd>No partitions detected</dd></div>
+                            ) : (
+                                partitionList.map(partition => (
+                                    <div className="detail-row storage-partition-row" key={partition.device}>
+                                        <dt title={partition.device}>{partition.name}</dt>
+                                        <dd className="storage-partition-info">
+                                            <span>{size(partition.size_bytes)} · {partition.filesystem ?? "Unknown filesystem"}</span>
+                                            <span title={partition.mountpoints.join(", ")}>
+                                                {partition.mountpoints.length
+                                                    ? partition.mountpoints.join(", ")
+                                                    : "Not mounted"}
+                                            </span>
+                                        </dd>
+                                    </div>
+                                ))
                             )}
                         </dl>
                     </div>
                     <div className="storage-view-switch" role="group" aria-label="Storage metrics view">
                         <button type="button" className={overview ? "storage-view-button is-active" : "storage-view-button"}
                             aria-pressed={overview} onClick={() => setView("overview")}>Overview</button>
-                        <button type="button" className={!overview ? "storage-view-button is-active" : "storage-view-button"}
-                            aria-pressed={!overview} onClick={() => setView("performance")}>Performance</button>
+                        <button type="button" className={performance ? "storage-view-button is-active" : "storage-view-button"}
+                            aria-pressed={performance} onClick={() => setView("performance")}>Performance</button>
+                        <button type="button" className={view === "partitions" ? "storage-view-button is-active" : "storage-view-button"}
+                            aria-pressed={view === "partitions"} onClick={() => setView("partitions")}>Partitions</button>
                     </div>
                 </>
             )}
