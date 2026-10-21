@@ -133,6 +133,10 @@ export interface NetworkInterfaceResponse {
     is_up: boolean | null;
     speed_mbps: number | null;
     mtu: number | null;
+    driver?: string | null;
+    hardware_path?: string | null;
+    duplex?: "Full" | "Half" | null;
+    operstate?: string | null;
     bytes_recv: number;
     bytes_sent: number;
     packets_recv: number;

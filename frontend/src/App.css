@@ -542,3 +542,7 @@
 .system-view-button { padding: 8px 3px; }
 .system-primary-stat .metric-primary { overflow-wrap: anywhere; }
 .system-metric-details .detail-row { min-height: 35px; }
+
+/* Network Adapter view: keep three equal-width navigation tabs. */
+.network-view-button { padding: 8px 3px; }
+.network-primary-stat .metric-primary { overflow-wrap: anywhere; }

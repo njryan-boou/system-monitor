@@ -126,6 +126,10 @@ class NetworkInterfaceResponse(BaseModel):
     is_up: bool | None = None
     speed_mbps: int | None = None
     mtu: int | None = None
+    driver: str | None = None
+    hardware_path: str | None = None
+    duplex: Literal["Full", "Half"] | None = None
+    operstate: str | None = None
     bytes_recv: int
     bytes_sent: int
     packets_recv: int
