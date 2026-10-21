@@ -74,7 +74,7 @@ function MemoryCard({ memory }: MemoryCardProps) {
                                     <div className="detail-row"><dt>Installed Modules</dt>
                                         <dd>{memory.memory_module_count ?? "N/A"}</dd>
                                     </div>
-                                    <div className="detail-row"><dt>Configured Speed</dt>
+                                    <div className="detail-row"><dt>Reported Speed</dt>
                                         <dd>{transferRate(memory.memory_speed_mtps)}</dd>
                                     </div>
                                     {modules.map((module, index) => (
