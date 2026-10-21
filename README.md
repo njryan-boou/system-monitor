@@ -98,6 +98,25 @@ show each reported mount point. If `lsblk` is unavailable (for example on
 non-Linux platforms), the view reports that partition information is
 unavailable without affecting existing disk monitoring.
 
+### Network Monitoring
+
+- Choose individual network interfaces using the card's top-left arrows
+- **Overview:** live download and upload rates plus cumulative traffic
+- **Performance:** reported link speed, packet counters, errors and drops
+- **Adapter:** connection status, interface type, driver, link duplex,
+  maximum transmission unit (MTU), operational state and hardware bus ID
+
+The Network **Adapter** view shows read-only Linux sysfs and psutil
+metadata. Some interfaces (for example virtual adapters or VPN tunnels)
+do not expose a driver, hardware path or duplex, so those values display
+`N/A`. The aggregate **All Interfaces** selection has no single adapter
+identity, and prompts you to select one using the arrows.
+
+System Monitor's public demo exposes information about its **backend host**,
+not the visitor's computer. To avoid revealing additional private network
+identifiers from that host, this view intentionally does not publish local
+IP or MAC addresses in the public API.
+
 ### System Information
 
 - Operating system
