@@ -28,6 +28,14 @@ class CPUResponse(BaseModel):
     cache_instances: list[CacheInstanceResponse] = Field(default_factory=list)
 
 
+class MemoryModuleResponse(BaseModel):
+    slot: str | None = None
+    capacity_bytes: int
+    memory_type: str | None = None
+    speed_mtps: int | None = None
+    manufacturer: str | None = None
+
+
 class MemoryResponse(BaseModel):
     total: int
     used: int
@@ -37,6 +45,11 @@ class MemoryResponse(BaseModel):
     swap_total: int = 0
     swap_used: int = 0
     swap_percent: float | None = None
+    memory_type: str | None = None
+    memory_speed_mtps: int | None = None
+    memory_module_count: int | None = None
+    memory_modules: list[MemoryModuleResponse] = Field(default_factory=list)
+    memory_hardware_source: Literal["smbios", "snapshot"] | None = None
 
 
 class StorageResponse(BaseModel):

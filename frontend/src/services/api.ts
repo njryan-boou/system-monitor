@@ -23,6 +23,14 @@ export interface CPUResponse {
     cache_instances?: CPUCacheInstanceResponse[];
 }
 
+export interface MemoryModuleResponse {
+    slot: string | null;
+    capacity_bytes: number;
+    memory_type: string | null;
+    speed_mtps: number | null;
+    manufacturer: string | null;
+}
+
 export interface MemoryResponse {
     total: number;
     used: number;
@@ -32,6 +40,11 @@ export interface MemoryResponse {
     swap_total?: number;
     swap_used?: number;
     swap_percent?: number | null;
+    memory_type?: string | null;
+    memory_speed_mtps?: number | null;
+    memory_module_count?: number | null;
+    memory_modules?: MemoryModuleResponse[];
+    memory_hardware_source?: "smbios" | "snapshot" | null;
 }
 
 export interface StorageResponse {
