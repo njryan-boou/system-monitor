@@ -543,6 +543,10 @@
 .system-primary-stat .metric-primary { overflow-wrap: anywhere; }
 .system-metric-details .detail-row { min-height: 35px; }
 
+/* Network Adapter view: keep three equal-width navigation tabs. */
+.network-view-button { padding: 8px 3px; }
+.network-primary-stat .metric-primary { overflow-wrap: anywhere; }
+
 /* GPU Memory: same fixed-height card, three tabs and scroll-safe details. */
 .gpu-card { min-width: 0; }
 .gpu-card-content { min-width: 0; }

@@ -29,6 +29,46 @@ def interface_type(name: str, sys_net: Path = SYS_NET) -> str:
     return "Other"
 
 
+def adapter_properties(name: str, stat=None, sys_net: Path = SYS_NET) -> dict:
+    """Read hardware/link metadata without privileged tools or network changes.
+
+    Network addresses and MAC identifiers are intentionally not added to the
+    public API: the hosted demo can expose its backend telemetry to visitors.
+    """
+    path = sys_net / name
+    try:
+        driver = (path / "device" / "driver").resolve(strict=True).name
+    except (OSError, RuntimeError):
+        driver = None
+    try:
+        # PCI/USB devices expose a hardware sysfs path. The final component
+        # identifies the bus device (not an identifying serial number).
+        hardware_path = (path / "device").resolve(strict=True).name
+    except (OSError, RuntimeError):
+        hardware_path = None
+    try:
+        state = (path / "operstate").read_text(encoding="utf-8").strip()
+    except (OSError, UnicodeError):
+        state = None
+    if state not in ("up", "down", "dormant", "lowerlayerdown", "testing", "unknown", "notpresent"):
+        state = None
+
+    duplex_code = getattr(stat, "duplex", None)
+    if duplex_code == psutil.NIC_DUPLEX_FULL:
+        duplex = "Full"
+    elif duplex_code == psutil.NIC_DUPLEX_HALF:
+        duplex = "Half"
+    else:
+        duplex = None
+
+    return {
+        "driver": driver,
+        "hardware_path": hardware_path,
+        "operstate": state,
+        "duplex": duplex,
+    }
+
+
 def sample_rates(counters: dict, timestamp: float) -> dict[str, dict]:
     """Compute nonnegative deltas against the preceding successful sample."""
     rates = {}
@@ -105,6 +145,10 @@ def get_network_interfaces() -> list[dict]:
         "is_up": None,
         "speed_mbps": None,
         "mtu": None,
+        "driver": None,
+        "hardware_path": None,
+        "operstate": None,
+        "duplex": None,
         **_totals(total),
         **rates["all"],
     }]
@@ -126,6 +170,7 @@ def get_network_interfaces() -> list[dict]:
             "is_up": getattr(stat, "isup", None),
             "speed_mbps": speed if speed is not None and speed > 0 else None,
             "mtu": getattr(stat, "mtu", None),
+            **adapter_properties(name, stat),
             **_totals(counters[name]),
             **rates[name],
         })
