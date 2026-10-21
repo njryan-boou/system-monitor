@@ -190,3 +190,10 @@
     color: #60a5fa;
     flex-shrink: 0;
 }
+
+/* GPU switching */
+.gpu-card-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
+.gpu-navigation { display: flex; align-items: center; gap: 6px; color: #94a3b8; font-size: 12px; white-space: nowrap; }
+.gpu-navigation button { display: inline-flex; align-items: center; justify-content: center; padding: 5px; background: transparent; color: #e5e7eb; border: 1px solid #293548; border-radius: 6px; cursor: pointer; }
+.gpu-navigation button:hover { background: #293548; }
+.gpu-navigation button:focus-visible { outline: 2px solid #60a5fa; outline-offset: 2px; }
