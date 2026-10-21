@@ -501,3 +501,6 @@
 .cpu-metric-details .detail-row dd { min-width: 0; overflow-wrap: anywhere; }
 .cpu-view-switch { flex: 0 0 auto; margin-top: 12px; }
 .cpu-view-button { padding: 8px 3px; }
+
+.cpu-cache-value { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; }
+.cpu-cache-total { color: #94a3b8; font-size: 11px; line-height: 1.3; }
