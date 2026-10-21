@@ -98,7 +98,21 @@ def get_cpu_cache_info(cpu_root: Path = CPU_SYSFS) -> dict:
         matching = [size for (level, kind, _), size in groups.items() if predicate(level, kind)]
         return sum(matching) if matching else None
 
+    # One record per distinct cache size/type, with the physical instance
+    # count. Hybrid processors may have differently-sized L2/L3 groups.
+    by_instance: dict[tuple[int, str, int], int] = {}
+    for (level, kind, _), size in groups.items():
+        key = (level, kind, size)
+        by_instance[key] = by_instance.get(key, 0) + 1
+    instance_sizes = [
+        {"level": level, "kind": kind, "size_bytes": size, "count": count}
+        for (level, kind, size), count in sorted(
+            by_instance.items(), key=lambda item: (item[0][0], item[0][1], item[0][2])
+        )
+    ]
+
     return {
+        "cache_instances": instance_sizes,
         "cache_l1_data_bytes": total(lambda level, kind: level == 1 and kind == "Data"),
         "cache_l1_instruction_bytes": total(lambda level, kind: level == 1 and kind == "Instruction"),
         "cache_l1_unified_bytes": total(lambda level, kind: level == 1 and kind == "Unified"),
