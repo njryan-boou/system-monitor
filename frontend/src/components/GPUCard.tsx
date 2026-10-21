@@ -6,7 +6,21 @@ interface GPUCardProps {
     gpus: GPUDeviceResponse[] | null;
 }
 
-type MetricView = "overview" | "performance";
+type MetricView = "overview" | "performance" | "memory";
+
+const validBytes = (value: number | null | undefined): value is number =>
+    value != null && Number.isFinite(value) && value >= 0;
+
+const toGiB = (bytes: number | null | undefined): string =>
+    validBytes(bytes) ? `${(bytes / 1024 ** 3).toFixed(1)} GiB` : "N/A";
+
+const toResidentMemory = (bytes: number | null | undefined): string => {
+    if (!validBytes(bytes)) return "N/A";
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 ** 2) return `${(bytes / 1024).toFixed(1)} KiB`;
+    if (bytes < 1024 ** 3) return `${(bytes / 1024 ** 2).toFixed(1)} MiB`;
+    return toGiB(bytes);
+};
 
 function GPUCard({ gpus }: GPUCardProps) {
     const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -20,22 +34,27 @@ function GPUCard({ gpus }: GPUCardProps) {
         setSelectedId(devices[(index + offset + devices.length) % devices.length].id);
     };
 
-    const toGiB = (bytes: number | null) =>
-        bytes === null ? "N/A" : `${(bytes / 1024 ** 3).toFixed(1)} GiB`;
-
-    const toResidentMemory = (bytes: number | null) => {
-        if (bytes === null) return "N/A";
-        if (bytes < 1024) return `${bytes} B`;
-        if (bytes < 1024 ** 2) return `${(bytes / 1024).toFixed(1)} KiB`;
-        if (bytes < 1024 ** 3) return `${(bytes / 1024 ** 2).toFixed(1)} MiB`;
-        return toGiB(bytes);
-    };
-
     const overview = view === "overview";
+    const performance = view === "performance";
+    const memory = view === "memory";
     const activeClock = gpu?.clock_mhz;
     const maxClock = gpu?.max_clock_mhz;
     const clockPercent = activeClock != null && maxClock != null && maxClock > 0
         ? Math.max(0, Math.min(100, activeClock / maxClock * 100))
+        : null;
+
+    // Intel Xe's memory_used is the *largest accessible DRM client's* resident
+    // memory, not whole-device memory. Never derive VRAM capacity or utilization
+    // from such samples (nor from a missing/invalid memory_total).
+    const clientResident = Boolean(gpu?.memory_label);
+    const hasDeviceMemory = !clientResident &&
+        validBytes(gpu?.memory_used) && validBytes(gpu?.memory_total) &&
+        gpu.memory_total > 0 && gpu.memory_used <= gpu.memory_total;
+    const memoryPercent = hasDeviceMemory && gpu
+        ? 100 * (gpu.memory_used! / gpu.memory_total!)
+        : null;
+    const memoryFree = hasDeviceMemory && gpu
+        ? gpu.memory_total! - gpu.memory_used!
         : null;
 
     return (
@@ -63,7 +82,7 @@ function GPUCard({ gpus }: GPUCardProps) {
                 <>
                     <div className="gpu-card-content">
                         <div className="gpu-device-identity">
-                            <p className="metric-lead">{gpu.name ?? "Graphics Processor"}</p>
+                            <p className="metric-lead" title={gpu.name ?? undefined}>{gpu.name ?? "Graphics Processor"}</p>
                             {gpu.gpu_type && (
                                 <p className="gpu-type-label">
                                     {gpu.gpu_type === "integrated" ? "Integrated GPU" : "Dedicated GPU"}
@@ -75,27 +94,34 @@ function GPUCard({ gpus }: GPUCardProps) {
                             <p className="metric-primary">
                                 {overview
                                     ? gpu.usage === null ? "N/A" : `${gpu.usage.toFixed(1)}%`
-                                    : activeClock == null ? "N/A" : `${activeClock.toFixed(0)} MHz`}
+                                    : performance
+                                        ? activeClock == null ? "N/A" : `${activeClock.toFixed(0)} MHz`
+                                        : memoryPercent !== null
+                                            ? `${memoryPercent.toFixed(1)}%`
+                                            : clientResident
+                                                ? toResidentMemory(gpu.memory_used)
+                                                : toResidentMemory(gpu.memory_used)}
                             </p>
                             <p className="metric-lead">
-                                {overview ? (gpu.usage_label ?? "GPU Utilization") : "Current GPU Clock"}
+                                {overview
+                                    ? (gpu.usage_label ?? "GPU Utilization")
+                                    : performance ? "Current GPU Clock"
+                                        : memoryPercent !== null ? "Reported VRAM Utilization"
+                                            : clientResident ? "Largest Accessible Client Resident Memory"
+                                                : "Reported GPU Memory Used"}
                             </p>
                             <div className="gpu-progress-slot">
                                 {overview && gpu.usage !== null && (
-                                    <progress
-                                        className="usage-progress"
-                                        value={gpu.usage}
-                                        max={100}
-                                        aria-label={gpu.usage_label ?? "GPU utilization"}
-                                    />
+                                    <progress className="usage-progress" value={gpu.usage} max={100}
+                                        aria-label={gpu.usage_label ?? "GPU utilization"} />
                                 )}
-                                {!overview && clockPercent !== null && (
-                                    <progress
-                                        className="usage-progress"
-                                        value={clockPercent}
-                                        max={100}
-                                        aria-label="Current GPU clock as a percentage of maximum clock"
-                                    />
+                                {performance && clockPercent !== null && (
+                                    <progress className="usage-progress" value={clockPercent} max={100}
+                                        aria-label="Current GPU clock as a percentage of maximum clock" />
+                                )}
+                                {memory && memoryPercent !== null && (
+                                    <progress className="usage-progress" value={memoryPercent} max={100}
+                                        aria-label="Reported VRAM utilization" />
                                 )}
                             </div>
                         </div>
@@ -118,7 +144,7 @@ function GPUCard({ gpus }: GPUCardProps) {
                                         <dd>{gpu.temperature_c == null ? "N/A" : `${gpu.temperature_c}°C`}</dd>
                                     </div>
                                 </>
-                            ) : (
+                            ) : performance ? (
                                 <>
                                     <div className="detail-row">
                                         <dt>Maximum Clock</dt>
@@ -133,27 +159,48 @@ function GPUCard({ gpus }: GPUCardProps) {
                                         <dd>{gpu.memory_clock_mhz == null ? "N/A" : `${gpu.memory_clock_mhz.toFixed(0)} MHz`}</dd>
                                     </div>
                                 </>
+                            ) : (
+                                <>
+                                    <div className="detail-row">
+                                        <dt>{clientResident ? "Client Resident" : "VRAM Used"}</dt>
+                                        <dd>{toResidentMemory(gpu.memory_used)}</dd>
+                                    </div>
+                                    <div className="detail-row">
+                                        <dt>VRAM Available</dt>
+                                        <dd>{toResidentMemory(memoryFree)}</dd>
+                                    </div>
+                                    <div className="detail-row">
+                                        <dt>VRAM Capacity</dt>
+                                        <dd>{clientResident ? "N/A" : toResidentMemory(gpu.memory_total)}</dd>
+                                    </div>
+                                    <div className="detail-row">
+                                        <dt>Memory Clock</dt>
+                                        <dd>{gpu.memory_clock_mhz == null ? "N/A" : `${gpu.memory_clock_mhz.toFixed(0)} MHz`}</dd>
+                                    </div>
+                                    {clientResident && (
+                                        <div className="detail-row">
+                                            <dt>Measurement</dt>
+                                            <dd>Largest accessible client, not total GPU memory</dd>
+                                        </div>
+                                    )}
+                                    {!clientResident && gpu.gpu_type === "integrated" && (
+                                        <div className="detail-row">
+                                            <dt>Measurement</dt>
+                                            <dd>Driver-reported VRAM region, not all shared RAM</dd>
+                                        </div>
+                                    )}
+                                </>
                             )}
                         </dl>
                     </div>
 
                     <div className="gpu-view-switch" role="group" aria-label="GPU metrics view">
-                        <button
-                            type="button"
-                            className={overview ? "gpu-view-button is-active" : "gpu-view-button"}
-                            aria-pressed={overview}
-                            onClick={() => setView("overview")}
-                        >
-                            Overview
-                        </button>
-                        <button
-                            type="button"
-                            className={!overview ? "gpu-view-button is-active" : "gpu-view-button"}
-                            aria-pressed={!overview}
-                            onClick={() => setView("performance")}
-                        >
-                            Performance
-                        </button>
+                        <button type="button" className={overview ? "gpu-view-button is-active" : "gpu-view-button"}
+                            aria-pressed={overview} onClick={() => setView("overview")}>Overview</button>
+                        <button type="button" className={performance ? "gpu-view-button is-active" : "gpu-view-button"}
+                            aria-pressed={performance} onClick={() => setView("performance")}>Performance</button>
+                        <button type="button" className={memory ? "gpu-view-button is-active" : "gpu-view-button"}
+                            aria-pressed={memory} onClick={() => setView("memory")}>Memory</button>
                     </div>
                 </>
             )}
