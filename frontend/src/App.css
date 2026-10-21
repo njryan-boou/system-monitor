@@ -414,3 +414,34 @@
 .storage-view-button:hover { background: #293548; color: #e5e7eb; }
 .storage-view-button.is-active { background: #1e3a5f; border-color: #3b82f6; color: #dbeafe; }
 .storage-view-button:focus-visible { outline: 2px solid #60a5fa; outline-offset: 2px; }
+
+/* Fixed-height network card with adapter navigation */
+.network-card { display: flex; flex-direction: column; height: 450px; min-width: 0; }
+.network-card-header { display: flex; align-items: center; justify-content: space-between; min-height: 34px; flex-shrink: 0; gap: 8px; }
+.network-card-header .card-title { margin: 0 0 0 auto; }
+.network-card-content { display: flex; flex: 1 1 auto; flex-direction: column; min-height: 0; min-width: 0; }
+.network-identity { flex: 0 0 70px; min-width: 0; overflow: hidden; padding-top: 10px; }
+.network-identity .metric-lead { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.network-primary-stat { flex: 0 0 92px; min-width: 0; }
+.network-primary-stat .metric-primary { margin: 6px 0; font-size: clamp(25px, 2.4vw, 34px); overflow-wrap: anywhere; line-height: 1.2; }
+.network-metric-details {
+    margin-top: 8px; padding-top: 12px; flex: 1 1 auto;
+    min-height: 0; min-width: 0; overflow-y: auto; overflow-x: hidden;
+    scrollbar-width: thin; scrollbar-color: #475569 transparent;
+}
+.network-metric-details .detail-row {
+    display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
+    align-items: start; gap: 8px; padding: 7px 4px 7px 0;
+}
+.network-metric-details .detail-row dt,
+.network-metric-details .detail-row dd { min-width: 0; overflow-wrap: anywhere; }
+.network-view-switch { display: flex; flex: 0 0 auto; gap: 6px; margin-top: 12px; }
+.network-view-button {
+    flex: 1; min-width: 0; padding: 8px 6px;
+    font: inherit; font-size: 12px; font-weight: 600;
+    border: 1px solid #293548; border-radius: 7px;
+    background: transparent; color: #94a3b8; cursor: pointer;
+}
+.network-view-button:hover { background: #293548; color: #e5e7eb; }
+.network-view-button.is-active { background: #1e3a5f; border-color: #3b82f6; color: #dbeafe; }
+.network-view-button:focus-visible { outline: 2px solid #60a5fa; outline-offset: 2px; }

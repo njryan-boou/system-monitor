@@ -62,6 +62,34 @@ export interface NetworkCountersResponse {
     bytes_recv: number;
 }
 
+export interface NetworkInterfaceResponse {
+    id: string;
+    name: string;
+    interface_type: string;
+    is_up: boolean | null;
+    speed_mbps: number | null;
+    mtu: number | null;
+    bytes_recv: number;
+    bytes_sent: number;
+    packets_recv: number;
+    packets_sent: number;
+    errors_recv: number;
+    errors_sent: number;
+    drops_recv: number;
+    drops_sent: number;
+    ready: boolean;
+    download_bytes_per_sec: number | null;
+    upload_bytes_per_sec: number | null;
+    download_packets_per_sec: number | null;
+    upload_packets_per_sec: number | null;
+}
+
+export async function getNetworkInterfaces(): Promise<NetworkInterfaceResponse[]> {
+    const response = await fetch("/api/system/network/interfaces");
+    if (!response.ok) throw new Error("Failed to fetch network interfaces");
+    return response.json();
+}
+
 export interface GPUResponse {
     available: boolean;
     name: string | null;

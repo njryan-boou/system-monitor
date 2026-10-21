@@ -61,6 +61,28 @@ class NetworkResponse(BaseModel):
     bytes_recv: int
     
     
+class NetworkInterfaceResponse(BaseModel):
+    id: str
+    name: str
+    interface_type: str
+    is_up: bool | None = None
+    speed_mbps: int | None = None
+    mtu: int | None = None
+    bytes_recv: int
+    bytes_sent: int
+    packets_recv: int
+    packets_sent: int
+    errors_recv: int
+    errors_sent: int
+    drops_recv: int
+    drops_sent: int
+    ready: bool
+    download_bytes_per_sec: float | None = None
+    upload_bytes_per_sec: float | None = None
+    download_packets_per_sec: float | None = None
+    upload_packets_per_sec: float | None = None
+
+
 class GPUResponse(BaseModel):
     available: bool
     name: str | None
