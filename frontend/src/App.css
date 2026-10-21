@@ -199,3 +199,26 @@
 .gpu-navigation button:focus-visible { outline: 2px solid #60a5fa; outline-offset: 2px; }
 
 .gpu-type-label { display: inline-block; margin: 0 0 4px; color: #93c5fd; font-size: 12px; font-weight: 600; }
+
+/* Fixed-height CPU metric views */
+.cpu-card { display: flex; flex-direction: column; height: 450px; }
+.cpu-card .card-title { flex-shrink: 0; }
+.cpu-card-content { display: flex; flex: 1; flex-direction: column; min-height: 0; }
+.cpu-device-name { min-height: 56px; overflow-wrap: anywhere; }
+.cpu-primary-stat { min-height: 115px; }
+.cpu-primary-stat .metric-primary { margin: 6px 0; }
+.cpu-progress-slot { height: 10px; margin-top: 12px; }
+.cpu-metric-details { margin-top: auto; padding-top: 12px; flex-shrink: 0; }
+.cpu-metric-details .detail-row { min-height: 35px; align-items: center; }
+.cpu-view-switch { display: flex; gap: 6px; margin-top: 16px; }
+.cpu-view-button {
+    flex: 1; min-width: 0; padding: 8px 6px;
+    font: inherit; font-size: 12px; font-weight: 600;
+    border: 1px solid #293548; border-radius: 7px;
+    background: transparent; color: #94a3b8; cursor: pointer;
+}
+.cpu-view-button:hover { background: #293548; color: #e5e7eb; }
+.cpu-view-button.is-active {
+    background: #1e3a5f; border-color: #3b82f6; color: #dbeafe;
+}
+.cpu-view-button:focus-visible { outline: 2px solid #60a5fa; outline-offset: 2px; }
