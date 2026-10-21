@@ -69,6 +69,14 @@ def get_amd_gpu_info() -> dict | None:
             temperature = round(value / 1000)
             break
 
+    clock_mhz = None
+    power_watts = None
+    for sensor in sorted(device.glob("hwmon/hwmon*/power1_average")):
+        micro_watts = read_int(sensor)
+        if micro_watts is not None and micro_watts >= 0:
+            power_watts = round(micro_watts / 1_000_000, 2)
+            break
+
     name, gpu_type = identify_gpu("amd", device)
 
     return {
@@ -78,5 +86,7 @@ def get_amd_gpu_info() -> dict | None:
         "usage": usage,
         "memory_used": memory_used,
         "memory_total": memory_total,
-        "temperature_c": temperature
+        "temperature_c": temperature,
+        "clock_mhz": clock_mhz,
+        "power_watts": power_watts
     }
