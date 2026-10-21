@@ -104,7 +104,7 @@ def read_client_resident_memory(pci_address: str, proc_root: Path = PROC_ROOT) -
             for key, raw in fields.items():
                 if not (key == "drm-resident-system" or key.startswith("drm-resident-vram")):
                     continue
-                match = re.fullmatch(r"(\\d+)\\s*(B|KiB|MiB|GiB)?", raw, re.I)
+                match = re.fullmatch(r"(\d+)\s*(B|KiB|MiB|GiB)?", raw, re.I)
                 if not match:
                     continue
                 units = (match.group(2) or "B").lower()
