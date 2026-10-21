@@ -191,14 +191,131 @@
     flex-shrink: 0;
 }
 
-/* GPU switching */
-.gpu-card-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
-.gpu-navigation { display: flex; align-items: center; gap: 6px; color: #94a3b8; font-size: 12px; white-space: nowrap; }
-.gpu-navigation button { display: inline-flex; align-items: center; justify-content: center; padding: 5px; background: transparent; color: #e5e7eb; border: 1px solid #293548; border-radius: 6px; cursor: pointer; }
-.gpu-navigation button:hover { background: #293548; }
-.gpu-navigation button:focus-visible { outline: 2px solid #60a5fa; outline-offset: 2px; }
+/* GPU device navigation and metric pages */
+.gpu-card {
+    display: flex;
+    flex-direction: column;
+    height: 450px;
+}
 
-.gpu-type-label { display: inline-block; margin: 0 0 4px; color: #93c5fd; font-size: 12px; font-weight: 600; }
+.gpu-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 34px;
+    gap: 8px;
+}
+
+.gpu-card-header .card-title {
+    margin: 0 0 0 auto;
+}
+
+.gpu-navigation {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: #94a3b8;
+    font-size: 12px;
+    white-space: nowrap;
+}
+
+.gpu-navigation button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 5px;
+    background: transparent;
+    color: #e5e7eb;
+    border: 1px solid #293548;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.gpu-navigation button:hover {
+    background: #293548;
+}
+
+.gpu-navigation button:focus-visible,
+.gpu-view-button:focus-visible {
+    outline: 2px solid #60a5fa;
+    outline-offset: 2px;
+}
+
+.gpu-card-content {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-height: 0;
+}
+
+.gpu-device-identity {
+    padding-top: 18px;
+    min-height: 70px;
+    overflow-wrap: anywhere;
+}
+
+.gpu-type-label {
+    display: inline-block;
+    margin: 4px 0 0;
+    color: #93c5fd;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.gpu-primary-stat {
+    min-height: 115px;
+}
+
+.gpu-primary-stat .metric-primary {
+    margin: 6px 0;
+}
+
+.gpu-progress-slot {
+    height: 10px;
+    margin-top: 12px;
+}
+
+.gpu-metric-details {
+    margin-top: auto;
+    padding-top: 12px;
+    flex-shrink: 0;
+}
+
+.gpu-metric-details .detail-row {
+    min-height: 35px;
+    align-items: center;
+}
+
+.gpu-view-switch {
+    display: flex;
+    gap: 6px;
+    margin-top: 16px;
+}
+
+.gpu-view-button {
+    flex: 1;
+    min-width: 0;
+    padding: 8px 6px;
+    font: inherit;
+    font-size: 12px;
+    font-weight: 600;
+    border: 1px solid #293548;
+    border-radius: 7px;
+    background: transparent;
+    color: #94a3b8;
+    cursor: pointer;
+}
+
+.gpu-view-button:hover {
+    background: #293548;
+    color: #e5e7eb;
+}
+
+.gpu-view-button.is-active {
+    background: #1e3a5f;
+    border-color: #3b82f6;
+    color: #dbeafe;
+}
 
 /* Fixed-height CPU metric views */
 .cpu-card { display: flex; flex-direction: column; height: 450px; }
