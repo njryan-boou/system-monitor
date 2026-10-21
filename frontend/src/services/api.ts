@@ -7,6 +7,12 @@ export interface CPUResponse {
     per_logical_cpu_usage?: number[];
     temperature_c?: number | null;
     load_average_1m?: number | null;
+    cache_l1_data_bytes?: number | null;
+    cache_l1_instruction_bytes?: number | null;
+    cache_l1_unified_bytes?: number | null;
+    cache_l2_bytes?: number | null;
+    cache_l3_bytes?: number | null;
+    cache_l3_groups?: number | null;
 }
 
 export interface MemoryResponse {
