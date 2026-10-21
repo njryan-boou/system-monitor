@@ -41,7 +41,7 @@ function DiskCard({ storage, devices }: DiskCardProps) {
                 <>
                     <div className="storage-card-content">
                         <div className="storage-device-name">
-                            <p className="metric-lead">{title}</p>
+                            <p className="metric-lead" title={title}>{title}</p>
                             {disk?.media_type && <p className="gpu-type-label">{disk.media_type}</p>}
                         </div>
                         <div className="storage-primary-stat">
@@ -60,7 +60,7 @@ function DiskCard({ storage, devices }: DiskCardProps) {
                         <dl className="metric-details storage-metric-details">
                             {overview ? (
                                 <>
-                                    <div className="detail-row"><dt>Mounted Volume</dt><dd>{disk ? (disk.mountpoint ?? "N/A") : storage.volume}</dd></div>
+                                    <div className="detail-row"><dt>Mounted Volume</dt><dd title={disk ? (disk.mountpoint ?? "N/A") : storage.volume}>{disk ? (disk.mountpoint ?? "N/A") : storage.volume}</dd></div>
                                     <div className="detail-row"><dt>Volume Used</dt><dd>{size(disk ? disk.volume_used : storage.used)}</dd></div>
                                     <div className="detail-row"><dt>Volume Available</dt><dd>{size(disk ? disk.volume_free : storage.free)}</dd></div>
                                     <div className="detail-row"><dt>Volume Total</dt><dd>{size(disk ? disk.volume_total : storage.total)}</dd></div>
