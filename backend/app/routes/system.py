@@ -10,12 +10,15 @@ from app.services.monitor import (
     get_network_info
 )
 
+from app.services.storage_devices import get_storage_devices
+
 from app.services.gpu import get_gpu_info, get_gpu_infos
 
 from app.schemas.system import (
     CPUResponse,
     MemoryResponse,
     StorageResponse,
+    StorageDeviceResponse,
     SystemResponse,
     NetworkResponse,
     GPUResponse,
@@ -39,6 +42,11 @@ def memory_usage():
 @router.get("/storage", response_model=StorageResponse)
 def storage_info():
     return get_storage_info()
+
+
+@router.get("/storage/devices", response_model=list[StorageDeviceResponse])
+def storage_devices():
+    return get_storage_devices()
 
 
 @router.get("/info", response_model=SystemResponse)

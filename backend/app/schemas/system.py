@@ -33,6 +33,22 @@ class StorageResponse(BaseModel):
     percent: float
 
 
+class StorageDeviceResponse(BaseModel):
+    id: str
+    name: str
+    device: str
+    media_type: Literal["SSD", "HDD"] | None = None
+    capacity_bytes: int | None = None
+    mountpoint: str | None = None
+    volume_total: int | None = None
+    volume_used: int | None = None
+    volume_free: int | None = None
+    volume_percent: float | None = None
+    read_bytes_per_sec: float | None = None
+    write_bytes_per_sec: float | None = None
+    busy_percent: float | None = None
+
+
 class SystemResponse(BaseModel):
     os: str
     os_release: str
