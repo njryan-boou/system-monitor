@@ -1,4 +1,4 @@
-import type { CPUResponse } from "../services/api";
+import type { CPUCacheInstanceResponse, CPUResponse } from "../services/api";
 import { Cpu } from "lucide-react";
 import { memo, useState } from "react";
 
@@ -26,6 +26,33 @@ function CPUCard({ cpu }: CPUCardProps) {
     const average = samples.length
         ? samples.reduce((sum, value) => sum + value, 0) / samples.length
         : null;
+
+    // Show the size of each distinct cache instance as well as aggregate
+    // capacity. Hybrid CPUs can expose several sizes at the same level.
+    const cacheRow = (
+        label: string,
+        level: number,
+        kinds: CPUCacheInstanceResponse["kind"][],
+        totalBytes: number | null | undefined
+    ) => {
+        const instances = (cpu?.cache_instances ?? []).filter(
+            item => item.level === level && kinds.includes(item.kind)
+        );
+        const breakdown = instances.map(
+            item => `${formatCache(item.size_bytes)} × ${item.count}`
+        ).join(" + ");
+        return (
+            <div className="detail-row">
+                <dt>{label}</dt>
+                <dd className="cpu-cache-value">
+                    <span>{breakdown || formatCache(totalBytes)}</span>
+                    {breakdown && totalBytes != null && (
+                        <span className="cpu-cache-total">{formatCache(totalBytes)} total</span>
+                    )}
+                </dd>
+            </div>
+        );
+    };
 
     return (
         <section className="metric-card cpu-card">
@@ -79,13 +106,12 @@ function CPUCard({ cpu }: CPUCardProps) {
                                 </>
                             ) : (
                                 <>
-                                    <div className="detail-row"><dt>L1 Data</dt><dd>{formatCache(cpu.cache_l1_data_bytes)}</dd></div>
-                                    <div className="detail-row"><dt>L1 Instruction</dt><dd>{formatCache(cpu.cache_l1_instruction_bytes)}</dd></div>
-                                    {cpu.cache_l1_unified_bytes != null && (
-                                        <div className="detail-row"><dt>L1 Unified</dt><dd>{formatCache(cpu.cache_l1_unified_bytes)}</dd></div>
-                                    )}
-                                    <div className="detail-row"><dt>L2 Cache</dt><dd>{formatCache(cpu.cache_l2_bytes)}</dd></div>
-                                    <div className="detail-row"><dt>L3 Groups</dt><dd>{cpu.cache_l3_groups ?? "N/A"}</dd></div>
+                                    {cacheRow("L1 Data", 1, ["Data"], cpu.cache_l1_data_bytes)}
+                                    {cacheRow("L1 Instruction", 1, ["Instruction"], cpu.cache_l1_instruction_bytes)}
+                                    {cpu.cache_l1_unified_bytes != null &&
+                                        cacheRow("L1 Unified", 1, ["Unified"], cpu.cache_l1_unified_bytes)}
+                                    {cacheRow("L2 Cache", 2, ["Unified", "Data", "Instruction"], cpu.cache_l2_bytes)}
+                                    {cacheRow("L3 Caches", 3, ["Unified", "Data", "Instruction"], cpu.cache_l3_bytes)}
                                 </>
                             )}
                         </dl>
