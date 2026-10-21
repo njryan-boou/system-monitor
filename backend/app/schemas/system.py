@@ -76,6 +76,24 @@ class StorageDeviceResponse(BaseModel):
     busy_percent: float | None = None
 
 
+class StoragePartitionResponse(BaseModel):
+    name: str
+    device: str
+    size_bytes: int | None = None
+    filesystem: str | None = None
+    mountpoints: list[str] = Field(default_factory=list)
+
+
+class StorageDrivePartitionsResponse(BaseModel):
+    disk_id: str
+    partitions: list[StoragePartitionResponse] = Field(default_factory=list)
+
+
+class StoragePartitionsResponse(BaseModel):
+    available: bool
+    drives: list[StorageDrivePartitionsResponse] = Field(default_factory=list)
+
+
 class SystemResponse(BaseModel):
     os: str
     os_release: str
