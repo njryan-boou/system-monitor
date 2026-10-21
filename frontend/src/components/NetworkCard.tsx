@@ -6,7 +6,7 @@ interface NetworkCardProps {
     network: NetworkResponse | null;
     interfaces: NetworkInterfaceResponse[] | null;
 }
-type View = "overview" | "performance";
+type View = "overview" | "performance" | "adapter";
 const speed = (bytes: number | null) =>
     bytes == null ? "Sampling..." : `${(bytes / 1024 ** 2).toFixed(2)} MiB/s`;
 const bytesGiB = (bytes: number) => `${(bytes / 1024 ** 3).toFixed(2)} GiB`;
@@ -19,6 +19,8 @@ function NetworkCard({ network, interfaces }: NetworkCardProps) {
     const index = Math.max(0, items.findIndex(item => item.id === selectedId));
     const adapter = items[index];
     const overview = view === "overview";
+    const performance = view === "performance";
+    const individualAdapter = adapter?.id !== "all";
     const change = (step: number) => {
         if (items.length) setSelectedId(items[(index + step + items.length) % items.length].id);
     };
@@ -52,9 +54,12 @@ function NetworkCard({ network, interfaces }: NetworkCardProps) {
                         </div>
                         <div className="network-primary-stat">
                             <p className="metric-primary">
-                                {overview ? speed(down) : (adapter.speed_mbps != null ? `${adapter.speed_mbps} Mb/s` : "N/A")}
+                                {overview ? speed(down) : performance ?
+                                    (adapter.speed_mbps != null ? `${adapter.speed_mbps} Mb/s` : "N/A") :
+                                    !individualAdapter || adapter.is_up == null ? "N/A" :
+                                    adapter.is_up ? "Connected" : "Down"}
                             </p>
-                            <p className="metric-lead">{overview ? "Download Speed" : "Reported Link Speed"}</p>
+                            <p className="metric-lead">{overview ? "Download Speed" : performance ? "Reported Link Speed" : "Adapter Link Status"}</p>
                         </div>
                         <dl className="metric-details network-metric-details">
                             {overview ? (
@@ -63,12 +68,23 @@ function NetworkCard({ network, interfaces }: NetworkCardProps) {
                                     <div className="detail-row"><dt>Total Received</dt><dd>{bytesGiB(adapter.bytes_recv)}</dd></div>
                                     <div className="detail-row"><dt>Total Sent</dt><dd>{bytesGiB(adapter.bytes_sent)}</dd></div>
                                 </>
-                            ) : (
+                            ) : performance ? (
                                 <>
                                     <div className="detail-row"><dt>Received Packets</dt><dd>{count(adapter.packets_recv)}</dd></div>
                                     <div className="detail-row"><dt>Sent Packets</dt><dd>{count(adapter.packets_sent)}</dd></div>
                                     <div className="detail-row"><dt>Errors (Rx / Tx)</dt><dd>{count(adapter.errors_recv)} / {count(adapter.errors_sent)}</dd></div>
                                     <div className="detail-row"><dt>Dropped (Rx / Tx)</dt><dd>{count(adapter.drops_recv)} / {count(adapter.drops_sent)}</dd></div>
+                                </>
+                            ) : !individualAdapter ? (
+                                <div className="detail-row"><dt>Adapter</dt><dd>Select an interface using the arrows above</dd></div>
+                            ) : (
+                                <>
+                                    <div className="detail-row"><dt>Interface Type</dt><dd>{adapter.interface_type}</dd></div>
+                                    <div className="detail-row"><dt>Driver</dt><dd>{adapter.driver ?? "N/A"}</dd></div>
+                                    <div className="detail-row"><dt>Duplex</dt><dd>{adapter.duplex ?? "N/A"}</dd></div>
+                                    <div className="detail-row"><dt>MTU</dt><dd>{adapter.mtu == null ? "N/A" : `${adapter.mtu} bytes`}</dd></div>
+                                    <div className="detail-row"><dt>Operating State</dt><dd>{adapter.operstate ?? "N/A"}</dd></div>
+                                    <div className="detail-row"><dt>Bus Device</dt><dd>{adapter.hardware_path ?? "N/A"}</dd></div>
                                 </>
                             )}
                         </dl>
@@ -76,8 +92,10 @@ function NetworkCard({ network, interfaces }: NetworkCardProps) {
                     <div className="network-view-switch" role="group" aria-label="Network metrics view">
                         <button type="button" className={overview ? "network-view-button is-active" : "network-view-button"}
                             aria-pressed={overview} onClick={() => setView("overview")}>Overview</button>
-                        <button type="button" className={!overview ? "network-view-button is-active" : "network-view-button"}
-                            aria-pressed={!overview} onClick={() => setView("performance")}>Performance</button>
+                        <button type="button" className={performance ? "network-view-button is-active" : "network-view-button"}
+                            aria-pressed={performance} onClick={() => setView("performance")}>Performance</button>
+                        <button type="button" className={view === "adapter" ? "network-view-button is-active" : "network-view-button"}
+                            aria-pressed={view === "adapter"} onClick={() => setView("adapter")}>Adapter</button>
                     </div>
                 </>
             )}
