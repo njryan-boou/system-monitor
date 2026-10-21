@@ -478,3 +478,29 @@
 .system-view-button:hover { background: #293548; color: #e5e7eb; }
 .system-view-button.is-active { background: #1e3a5f; border-color: #3b82f6; color: #dbeafe; }
 .system-view-button:focus-visible { outline: 2px solid #60a5fa; outline-offset: 2px; }
+
+/* CPU cache third view: fit all three buttons and longer cache details. */
+.cpu-card { min-width: 0; }
+.cpu-card-content { min-width: 0; }
+.cpu-device-name { max-height: 62px; overflow: hidden; }
+.cpu-device-name .metric-lead {
+    display: -webkit-box; -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2; line-clamp: 2; overflow: hidden;
+}
+.cpu-primary-stat .metric-primary { overflow-wrap: anywhere; }
+.cpu-metric-details {
+    margin-top: 8px; padding-top: 10px; flex: 1 1 auto;
+    min-height: 0; min-width: 0; overflow-y: auto; overflow-x: hidden;
+    scrollbar-width: thin; scrollbar-color: #475569 transparent;
+}
+.cpu-metric-details .detail-row {
+    display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
+    align-items: start; gap: 8px; min-height: 35px; padding: 6px 3px 6px 0;
+}
+.cpu-metric-details .detail-row dt,
+.cpu-metric-details .detail-row dd { min-width: 0; overflow-wrap: anywhere; }
+.cpu-view-switch { flex: 0 0 auto; margin-top: 12px; }
+.cpu-view-button { padding: 8px 3px; }
+
+.cpu-cache-value { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; }
+.cpu-cache-total { color: #94a3b8; font-size: 11px; line-height: 1.3; }

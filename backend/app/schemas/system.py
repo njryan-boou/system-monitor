@@ -1,6 +1,13 @@
 from typing import Literal
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
+
+
+class CacheInstanceResponse(BaseModel):
+    level: int
+    kind: Literal["Data", "Instruction", "Unified"]
+    size_bytes: int
+    count: int
 
 
 class CPUResponse(BaseModel):
@@ -12,6 +19,13 @@ class CPUResponse(BaseModel):
     per_logical_cpu_usage: list[float] = []
     temperature_c: float | None = None
     load_average_1m: float | None = None
+    cache_l1_data_bytes: int | None = None
+    cache_l1_instruction_bytes: int | None = None
+    cache_l1_unified_bytes: int | None = None
+    cache_l2_bytes: int | None = None
+    cache_l3_bytes: int | None = None
+    cache_l3_groups: int | None = None
+    cache_instances: list[CacheInstanceResponse] = Field(default_factory=list)
 
 
 class MemoryResponse(BaseModel):
