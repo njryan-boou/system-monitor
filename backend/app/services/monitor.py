@@ -6,6 +6,7 @@ from functools import lru_cache
 from cpuinfo import get_cpu_info as get_cpu_details
 from app.services.cpu_cache import get_cpu_cache_info
 from app.services.memory_hardware import get_memory_hardware
+from app.services.system_firmware import get_system_firmware
 
 
 @lru_cache(maxsize=1)
@@ -144,6 +145,7 @@ def get_system_info() -> dict:
         "hostname": platform.node() or None,
         "boot_time": boot_time,
         "process_count": process_count,
+        **get_system_firmware(),
     }
     
     

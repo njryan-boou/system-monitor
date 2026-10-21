@@ -537,3 +537,8 @@
 }
 .storage-partition-info span { max-width: 100%; overflow-wrap: anywhere; }
 .storage-partition-info span:last-child { color: #94a3b8; font-size: 11px; }
+
+/* System Firmware: three view tabs, fixed height and scrollable DMI rows. */
+.system-view-button { padding: 8px 3px; }
+.system-primary-stat .metric-primary { overflow-wrap: anywhere; }
+.system-metric-details .detail-row { min-height: 35px; }

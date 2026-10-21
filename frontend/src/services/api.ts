@@ -112,6 +112,13 @@ export interface SystemResponse {
     hostname?: string | null;
     boot_time?: number | null;
     process_count?: number | null;
+    motherboard_manufacturer?: string | null;
+    motherboard_model?: string | null;
+    motherboard_version?: string | null;
+    bios_vendor?: string | null;
+    bios_version?: string | null;
+    bios_release_date?: string | null;
+    boot_mode?: "UEFI" | "Legacy" | null;
 }
 
 export interface NetworkCountersResponse {

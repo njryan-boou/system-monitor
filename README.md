@@ -100,10 +100,25 @@ unavailable without affecting existing disk monitoring.
 
 ### System Information
 
-- Operating system
-- OS/kernel release
-- System architecture
-- System uptime
+- **Overview**, **Details**, and **Firmware** views
+- Operating system, OS/kernel release, system architecture, and uptime
+- Hostname, boot time, process count, and OS family
+- Linux motherboard manufacturer, model and board version, where available
+- BIOS/UEFI vendor, version and release date from DMI sysfs
+- Boot mode (UEFI/Legacy), only where it can be reasonably determined
+
+The System **Firmware** tab reads ordinary non-unique fields from
+`/sys/class/dmi/id` on Linux. It never reads or exposes serial numbers,
+system UUIDs or asset tags, never changes firmware settings, and **does not
+require sudo**. Some laptops, virtual machines and hosted environments hide
+some or all DMI fields; these display `N/A` rather than guessed values.
+
+The presence of `/sys/firmware/efi` is used to confirm a UEFI boot. If EFI
+is absent on a non-containerized Linux system with accessible sysfs, Legacy
+boot is reported; if the environment cannot distinguish legacy boot from
+hidden EFI information (such as in containers), boot mode stays unavailable.
+Firmware information is static during operation and is cached by the server.
+
 
 ### Web Dashboard
 
