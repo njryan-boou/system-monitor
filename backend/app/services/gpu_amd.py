@@ -70,13 +70,6 @@ def get_amd_gpu_info() -> dict | None:
             break
 
     clock_mhz = None
-    # These optional integer counters are not available on every amdgpu driver.
-    for clock_file in (device / "gpu_clock_counter", device / "current_gpu_clock"):
-        value = read_int(clock_file)
-        if value is not None and value >= 0:
-            clock_mhz = round(value / 1000, 1)
-            break
-
     power_watts = None
     for sensor in sorted(device.glob("hwmon/hwmon*/power1_average")):
         micro_watts = read_int(sensor)
