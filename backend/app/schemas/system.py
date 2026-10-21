@@ -1,3 +1,5 @@
+from typing import Literal
+
 from pydantic import BaseModel
 
 
@@ -44,3 +46,7 @@ class GPUResponse(BaseModel):
     memory_total: int | None
     temperature_c: int | None
     usage_label: str | None = None
+
+class GPUDeviceResponse(GPUResponse):
+    id: str
+    vendor: Literal["nvidia", "amd", "intel"]
