@@ -9,6 +9,7 @@ from functools import lru_cache
 from pathlib import Path
 from threading import Lock
 import re
+from time import monotonic
 
 from app.services.gpu_identity import identify_gpu
 
@@ -19,6 +20,8 @@ ENGINES = ("rcs", "ccs", "vcs", "vecs", "bcs")
 
 _sample_lock = Lock()
 _previous_sample: dict | None = None
+_power_lock = Lock()
+_previous_energy: dict[Path, tuple[int, float]] = {}
 
 
 @lru_cache(maxsize=1)
@@ -83,7 +86,8 @@ def get_gpu_clients(pci_address: str, proc_root: Path = PROC_ROOT) -> dict:
 def read_client_resident_memory(pci_address: str, proc_root: Path = PROC_ROOT) -> int | None:
     """Largest accessible Xe client's resident bytes; NOT whole-GPU memory.
 
-    xe fdinfo reports region residency in KiB (or bytes on some kernels).
+    Xe fdinfo reports residency separately for system, GTT, stolen and VRAM
+    regions, using KiB, MiB, bytes or (for zero) no unit.
     Deduplicate each DRM client, and sum its separate memory regions.
     Shared buffers may occur in several clients: do not sum across clients.
     """
@@ -102,7 +106,7 @@ def read_client_resident_memory(pci_address: str, proc_root: Path = PROC_ROOT) -
                 continue
             regions: dict[str, int] = {}
             for key, raw in fields.items():
-                if not (key == "drm-resident-system" or key.startswith("drm-resident-vram")):
+                if not re.fullmatch(r"drm-resident-(?:system|gtt|stolen|vram[0-9]+)", key):
                     continue
                 match = re.fullmatch(r"(\d+)\s*(B|KiB|MiB|GiB)?", raw, re.I)
                 if not match:
@@ -153,6 +157,67 @@ def read_temperature(device: Path) -> int | None:
     return None
 
 
+def read_gt_clock_mhz(device: Path, attribute: str = "act_freq") -> float | None:
+    """Read a GT clock in MHz; prefer tile0/gt0 on multi-GT adapters.
+
+    act_freq is the actual hardware-resolved frequency; cur_freq is only
+    a request and must not be substituted for it.
+    """
+    if attribute not in ("act_freq", "rp0_freq"):
+        return None
+    preferred = device / "tile0/gt0/freq0" / attribute
+    alternatives = sorted(device.glob(f"tile[0-9]*/gt[0-9]*/freq0/{attribute}"))
+    candidates = [preferred, *(p for p in alternatives if p != preferred)]
+    for path in candidates:
+        try:
+            mhz = float(path.read_text().strip())
+        except (OSError, ValueError):
+            continue
+        if 0 <= mhz <= 10000:
+            return round(mhz, 1)
+    return None
+
+
+def read_gpu_power_watts(device: Path) -> float | None:
+    """Read Xe card power only from GPU-attached HWMON, if supported.
+
+    The xe energy1_input counter is in microjoules; its positive delta
+    over elapsed monotonic seconds yields watts. Missing sensors and
+    warm-up samples are unavailable rather than guessed package power.
+    """
+    for sensor in sorted(device.glob("hwmon/hwmon*/power1_input")):
+        try:
+            power_uw = int(sensor.read_text().strip())
+        except (OSError, ValueError):
+            continue
+        if power_uw >= 0:
+            return round(power_uw / 1_000_000, 2)
+
+    files = sorted(device.glob("hwmon/hwmon*/energy1_input"))
+    if not files:
+        return None
+    with _power_lock:
+        for sensor in files:
+            try:
+                energy_uj = int(sensor.read_text().strip())
+            except (OSError, ValueError):
+                continue
+            if energy_uj < 0:
+                continue
+            timestamp = monotonic()
+            previous = _previous_energy.get(sensor)
+            _previous_energy[sensor] = (energy_uj, timestamp)
+            if previous is None:
+                return None
+            old_energy, old_time = previous
+            elapsed = timestamp - old_time
+            delta = energy_uj - old_energy
+            if delta >= 0 and elapsed > 0:
+                return round(delta / 1_000_000 / elapsed, 2)
+            return None
+    return None
+
+
 def get_intel_gpu_info() -> dict | None:
     global _previous_sample
 
@@ -179,6 +244,9 @@ def get_intel_gpu_info() -> dict | None:
         "usage_label": "Peak Client Engine Activity",
         "memory_used": read_client_resident_memory(device.name),
         "memory_total": None,
-        "memory_label": "Peak Client Resident Memory",
+        "memory_label": "Largest Client Resident Memory",
         "temperature_c": read_temperature(device),
+        "clock_mhz": read_gt_clock_mhz(device),
+        "max_clock_mhz": read_gt_clock_mhz(device, "rp0_freq"),
+        "power_watts": read_gpu_power_watts(device),
     }
