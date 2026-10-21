@@ -1,3 +1,10 @@
+export interface CPUCacheInstanceResponse {
+    level: number;
+    kind: "Data" | "Instruction" | "Unified";
+    size_bytes: number;
+    count: number;
+}
+
 export interface CPUResponse {
     name: string;
     usage: number;
@@ -13,6 +20,7 @@ export interface CPUResponse {
     cache_l2_bytes?: number | null;
     cache_l3_bytes?: number | null;
     cache_l3_groups?: number | null;
+    cache_instances?: CPUCacheInstanceResponse[];
 }
 
 export interface MemoryResponse {
