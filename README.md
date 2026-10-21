@@ -47,6 +47,37 @@ refreshing measurements.
 - Used memory
 - Available memory
 - Memory utilization percentage
+- Overview, Performance (swap), and Hardware views
+- Optional SMBIOS-reported RAM generation, module capacities, reported speeds,
+  slot identifiers, and manufacturers (when exposed by firmware)
+
+#### RAM Hardware tab on Linux
+
+The Memory card's Hardware tab reads **SMBIOS Type 17**, when the OS makes it
+accessible. This contains the installed module configuration. On many Linux
+systems, including Fedora, the relevant files under
+`/sys/firmware/dmi/entries/17-*/raw` require elevated permissions.
+
+**System Monitor never runs sudo or requires root at runtime.** If the Hardware
+tab shows `N/A`, optionally capture a sanitized local snapshot once:
+
+```bash
+cd ~/Projects/system-monitor
+sudo python3 scripts/capture-memory-hardware.py
+bash scripts/run.sh
+```
+
+The script reads installed RAM information and writes only slot, capacity,
+type, transfer rate, and manufacturer to `backend/.memory-hardware.json`.
+It **does not store module serial numbers or asset tags**. The snapshot is
+gitignored. Restart System Monitor to load it. If you change RAM later,
+rerun the command and restart to refresh the snapshot.
+
+SMBIOS numbers reflect firmware-reported module specifications, not
+real-time memory bandwidth or a benchmark. In particular, configured speeds
+are reported in **MT/s**, not MHz; when configured speed isn't reported, the
+SMBIOS rated speed is used instead. Certain laptops and virtual machines do
+not provide module details, in which case values remain unavailable.
 
 ### Storage Monitoring
 
