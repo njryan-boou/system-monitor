@@ -16,9 +16,20 @@ function DiskCard({ storage, devices }: DiskCardProps) {
     const [selectedId, setSelectedId] = useState<string | null>(null);
     const [view, setView] = useState<View>("overview");
     const list = devices ?? [];
-    const index = Math.max(0, list.findIndex(disk => disk.id === selectedId));
+    // Open on the root filesystem's disk when available so the initial
+    // Overview can show a meaningful utilization percentage and progress bar.
+    // Once a user navigates, preserve that choice across polling updates.
+    const selectedIndex = list.findIndex(disk => disk.id === selectedId);
+    const rootIndex = list.findIndex(disk => disk.mountpoint === "/");
+    const mountedIndex = list.findIndex(disk => disk.volume_percent != null);
+    const defaultIndex = rootIndex >= 0 ? rootIndex : mountedIndex >= 0 ? mountedIndex : 0;
+    const index = selectedIndex >= 0 ? selectedIndex : defaultIndex;
     const disk = list[index];
     const overview = view === "overview";
+    // Utilization is the selected filesystem's usage, not physical drive usage.
+    const volumePercent = disk ? disk.volume_percent : storage?.percent;
+    const hasVolumeUsage = volumePercent != null && Number.isFinite(volumePercent);
+
     const select = (offset: number) => {
         if (!list.length) return;
         setSelectedId(list[(index + offset + list.length) % list.length].id);
@@ -41,18 +52,27 @@ function DiskCard({ storage, devices }: DiskCardProps) {
                 <>
                     <div className="storage-card-content">
                         <div className="storage-device-name">
-                            <p className="metric-lead">{title}</p>
+                            <p className="metric-lead" title={title}>{title}</p>
                             {disk?.media_type && <p className="gpu-type-label">{disk.media_type}</p>}
                         </div>
                         <div className="storage-primary-stat">
                             <p className="metric-primary">
                                 {overview
-                                    ? disk ? size(disk.capacity_bytes) : `${storage.percent.toFixed(1)}%`
+                                    ? hasVolumeUsage ? `${volumePercent.toFixed(1)}%` : "N/A"
                                     : disk?.busy_percent == null ? "N/A" : `${disk.busy_percent.toFixed(1)}%`}
                             </p>
-                            <p className="metric-lead">{overview ? (disk ? "Physical Drive Capacity" : "Root Filesystem Usage") : "Drive Busy Time"}</p>
+                            <p className="metric-lead" title={overview && disk && hasVolumeUsage ? "Usage of the mounted filesystem, not of the entire physical drive." : undefined}>
+                                {overview
+                                    ? hasVolumeUsage ? (disk ? "Mounted Volume Usage" : "Root Filesystem Usage") : "Filesystem Usage Unavailable"
+                                    : "Drive Busy Time"}
+                            </p>
                             <div className="storage-progress-slot">
-                                {overview && !disk && <progress className="usage-progress" value={storage.percent} max={100} aria-label="Root filesystem utilization"/>}
+                                {overview && hasVolumeUsage && <progress
+                                    className="usage-progress"
+                                    value={Math.max(0, Math.min(100, volumePercent))}
+                                    max={100}
+                                    aria-label={disk ? "Selected mounted filesystem utilization" : "Root filesystem utilization"}
+                                />}
                                 {!overview && disk?.busy_percent != null &&
                                     <progress className="usage-progress" value={disk.busy_percent} max={100} aria-label="Drive busy time"/>}
                             </div>
@@ -60,10 +80,11 @@ function DiskCard({ storage, devices }: DiskCardProps) {
                         <dl className="metric-details storage-metric-details">
                             {overview ? (
                                 <>
-                                    <div className="detail-row"><dt>Mounted Volume</dt><dd>{disk ? (disk.mountpoint ?? "N/A") : storage.volume}</dd></div>
+                                    <div className="detail-row"><dt>Mounted Volume</dt><dd title={disk ? (disk.mountpoint ?? "N/A") : storage.volume}>{disk ? (disk.mountpoint ?? "N/A") : storage.volume}</dd></div>
                                     <div className="detail-row"><dt>Volume Used</dt><dd>{size(disk ? disk.volume_used : storage.used)}</dd></div>
                                     <div className="detail-row"><dt>Volume Available</dt><dd>{size(disk ? disk.volume_free : storage.free)}</dd></div>
                                     <div className="detail-row"><dt>Volume Total</dt><dd>{size(disk ? disk.volume_total : storage.total)}</dd></div>
+                                    {disk && <div className="detail-row"><dt>Drive Capacity</dt><dd>{size(disk.capacity_bytes)}</dd></div>}
                                 </>
                             ) : (
                                 <>
