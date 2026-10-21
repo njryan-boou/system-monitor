@@ -339,3 +339,26 @@
     background: #1e3a5f; border-color: #3b82f6; color: #dbeafe;
 }
 .cpu-view-button:focus-visible { outline: 2px solid #60a5fa; outline-offset: 2px; }
+
+/* Fixed-size memory metric views */
+.memory-card { display: flex; flex-direction: column; height: 450px; }
+.memory-card .card-title { flex-shrink: 0; }
+.memory-card-content { display: flex; flex: 1; flex-direction: column; min-height: 0; }
+.memory-device-name { min-height: 56px; overflow-wrap: anywhere; }
+.memory-primary-stat { min-height: 115px; }
+.memory-primary-stat .metric-primary { margin: 6px 0; overflow-wrap: anywhere; }
+.memory-progress-slot { height: 10px; margin-top: 12px; }
+.memory-metric-details { margin-top: auto; padding-top: 12px; flex-shrink: 0; }
+.memory-metric-details .detail-row { min-height: 35px; align-items: center; }
+.memory-view-switch { display: flex; gap: 6px; margin-top: 16px; }
+.memory-view-button {
+    flex: 1; min-width: 0; padding: 8px 6px;
+    font: inherit; font-size: 12px; font-weight: 600;
+    border: 1px solid #293548; border-radius: 7px;
+    background: transparent; color: #94a3b8; cursor: pointer;
+}
+.memory-view-button:hover { background: #293548; color: #e5e7eb; }
+.memory-view-button.is-active {
+    background: #1e3a5f; border-color: #3b82f6; color: #dbeafe;
+}
+.memory-view-button:focus-visible { outline: 2px solid #60a5fa; outline-offset: 2px; }
