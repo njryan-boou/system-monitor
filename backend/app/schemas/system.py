@@ -9,6 +9,9 @@ class CPUResponse(BaseModel):
     physical_cores: int | None
     logical_cores: int | None
     frequency_mhz: float | None
+    per_logical_cpu_usage: list[float] = []
+    temperature_c: float | None = None
+    load_average_1m: float | None = None
 
 
 class MemoryResponse(BaseModel):

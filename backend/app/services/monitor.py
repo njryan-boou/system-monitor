@@ -21,6 +21,41 @@ def get_cpu_log_cores() -> int | None:
     return psutil.cpu_count(logical=True)
 
 
+
+def get_cpu_temperature() -> float | None:
+    """A CPU/package thermal sensor only; never use GPU or ACPI zone temps."""
+    reader = getattr(psutil, "sensors_temperatures", None)
+    if reader is None:
+        return None
+    try:
+        chips = reader()
+    except (OSError, RuntimeError, NotImplementedError):
+        return None
+
+    for chip_name, labels in (
+        ("k10temp", ("Tdie", "Tctl")),
+        ("coretemp", ("Package id 0",)),
+    ):
+        sensors = chips.get(chip_name, [])
+        for label in labels:
+            for sensor in sensors:
+                if (sensor.label or "").strip().lower() != label.lower():
+                    continue
+                value = sensor.current
+                if value is not None and -40 <= value <= 150:
+                    return round(float(value), 1)
+    return None
+
+
+def get_cpu_load_average() -> float | None:
+    """One-minute Linux run-queue load; not a CPU-utilization percentage."""
+    try:
+        one_min, _, _ = psutil.getloadavg()
+    except (OSError, AttributeError, NotImplementedError):
+        return None
+    return round(float(one_min), 2) if one_min >= 0 else None
+
+
 def get_cpu_info() -> dict:
     frequency = psutil.cpu_freq()
 
@@ -29,7 +64,10 @@ def get_cpu_info() -> dict:
         "usage": psutil.cpu_percent(interval=None),
         "physical_cores": get_cpu_phys_cores(),
         "logical_cores": get_cpu_log_cores(),
-        "frequency_mhz": frequency.current if frequency else None
+        "frequency_mhz": frequency.current if frequency else None,
+        "per_logical_cpu_usage": psutil.cpu_percent(interval=None, percpu=True),
+        "temperature_c": get_cpu_temperature(),
+        "load_average_1m": get_cpu_load_average(),
     }
 
 
