@@ -39,8 +39,8 @@ function GPUCard({ gpus }: GPUCardProps) {
                     <p className="metric-lead">{gpu.usage_label ?? "GPU Utilization"}</p>
                     {gpu.usage !== null && <progress className="usage-progress" value={gpu.usage} max={100} aria-label={gpu.usage_label ?? "GPU utilization"} />}
                     <dl className="metric-details">
-                        <div className="detail-row"><dt>VRAM Used</dt><dd>{toGiB(gpu.memory_used)}</dd></div>
-                        <div className="detail-row"><dt>VRAM Total</dt><dd>{toGiB(gpu.memory_total)}</dd></div>
+                        <div className="detail-row"><dt>{gpu.memory_label ?? "VRAM Used"}</dt><dd>{toGiB(gpu.memory_used)}</dd></div>
+                        {gpu.memory_label ? null : <div className="detail-row"><dt>VRAM Total</dt><dd>{toGiB(gpu.memory_total)}</dd></div>}
                         <div className="detail-row"><dt>Temperature</dt><dd>{gpu.temperature_c === null ? "N/A" : `${gpu.temperature_c}°C`}</dd></div>
                     </dl>
                 </>
