@@ -130,18 +130,16 @@ function GPUCard({ gpus }: GPUCardProps) {
                             {overview ? (
                                 <>
                                     <div className="detail-row">
-                                        <dt title={gpu.memory_label ? "Largest accessible GPU client resident memory, not total device memory." : undefined}>
-                                            {gpu.memory_label ? "Client Memory Used" : "VRAM Used"}
-                                        </dt>
-                                        <dd>{gpu.memory_label ? toResidentMemory(gpu.memory_used) : toGiB(gpu.memory_used)}</dd>
-                                    </div>
-                                    <div className="detail-row">
-                                        <dt>{gpu.memory_label ? "GPU Memory Total" : "VRAM Total"}</dt>
-                                        <dd>{toGiB(gpu.memory_total)}</dd>
-                                    </div>
-                                    <div className="detail-row">
                                         <dt>Temperature</dt>
                                         <dd>{gpu.temperature_c == null ? "N/A" : `${gpu.temperature_c}°C`}</dd>
+                                    </div>
+                                    <div className="detail-row">
+                                        <dt>GPU Power</dt>
+                                        <dd>{gpu.power_watts == null ? "N/A" : `${gpu.power_watts.toFixed(2)} W`}</dd>
+                                    </div>
+                                    <div className="detail-row">
+                                        <dt>GPU Type</dt>
+                                        <dd>{gpu.gpu_type === "integrated" ? "Integrated" : gpu.gpu_type === "dedicated" ? "Dedicated" : "N/A"}</dd>
                                     </div>
                                 </>
                             ) : performance ? (
@@ -151,12 +149,12 @@ function GPUCard({ gpus }: GPUCardProps) {
                                         <dd>{maxClock == null ? "N/A" : `${maxClock.toFixed(0)} MHz`}</dd>
                                     </div>
                                     <div className="detail-row">
-                                        <dt>GPU Power</dt>
-                                        <dd>{gpu.power_watts == null ? "N/A" : `${gpu.power_watts.toFixed(2)} W`}</dd>
-                                    </div>
-                                    <div className="detail-row">
                                         <dt>Memory Clock</dt>
                                         <dd>{gpu.memory_clock_mhz == null ? "N/A" : `${gpu.memory_clock_mhz.toFixed(0)} MHz`}</dd>
+                                    </div>
+                                    <div className="detail-row">
+                                        <dt>Clock vs Max</dt>
+                                        <dd>{clockPercent == null ? "N/A" : `${clockPercent.toFixed(1)}%`}</dd>
                                     </div>
                                 </>
                             ) : (
@@ -172,10 +170,6 @@ function GPUCard({ gpus }: GPUCardProps) {
                                     <div className="detail-row">
                                         <dt>VRAM Capacity</dt>
                                         <dd>{clientResident ? "N/A" : toResidentMemory(gpu.memory_total)}</dd>
-                                    </div>
-                                    <div className="detail-row">
-                                        <dt>Memory Clock</dt>
-                                        <dd>{gpu.memory_clock_mhz == null ? "N/A" : `${gpu.memory_clock_mhz.toFixed(0)} MHz`}</dd>
                                     </div>
                                     {clientResident && (
                                         <div className="detail-row">
