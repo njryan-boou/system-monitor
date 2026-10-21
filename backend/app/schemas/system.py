@@ -19,6 +19,10 @@ class MemoryResponse(BaseModel):
     used: int
     available: int
     percent: float
+    cached: int | None = None
+    swap_total: int = 0
+    swap_used: int = 0
+    swap_percent: float | None = None
 
 
 class StorageResponse(BaseModel):
