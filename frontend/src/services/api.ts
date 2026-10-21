@@ -4,6 +4,9 @@ export interface CPUResponse {
     physical_cores: number | null;
     logical_cores: number | null;
     frequency_mhz: number | null;
+    per_logical_cpu_usage?: number[];
+    temperature_c?: number | null;
+    load_average_1m?: number | null;
 }
 
 export interface MemoryResponse {
