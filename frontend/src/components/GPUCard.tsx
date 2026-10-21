@@ -45,15 +45,14 @@ function GPUCard({ gpus }: GPUCardProps) {
                     <p className="metric-lead">{gpu.usage_label ?? "GPU Utilization"}</p>
                     {gpu.usage !== null && <progress className="usage-progress" value={gpu.usage} max={100} aria-label={gpu.usage_label ?? "GPU utilization"} />}
                     <dl className="metric-details">
-                        <div className="detail-row"><dt>{gpu.memory_label ?? "VRAM Used"}</dt><dd>{gpu.memory_label ? toResidentMemory(gpu.memory_used) : toGiB(gpu.memory_used)}</dd></div>
-                        {gpu.memory_label ? null : <div className="detail-row"><dt>VRAM Total</dt><dd>{toGiB(gpu.memory_total)}</dd></div>}
-                        {gpu.vendor === "intel" && (
-                            <>
-                                <div className="detail-row"><dt>GPU Clock</dt><dd>{gpu.clock_mhz == null ? "N/A" : `${gpu.clock_mhz.toFixed(0)} MHz`}</dd></div>
-                                <div className="detail-row"><dt>Max GPU Clock</dt><dd>{gpu.max_clock_mhz == null ? "N/A" : `${gpu.max_clock_mhz.toFixed(0)} MHz`}</dd></div>
-                                <div className="detail-row"><dt>GPU Power</dt><dd>{gpu.power_watts == null ? "N/A" : `${gpu.power_watts.toFixed(2)} W`}</dd></div>
-                            </>
-                        )}
+                        <div className="detail-row">
+                            <dt title={gpu.memory_label ? "Largest accessible Intel Xe client resident memory, not GPU-wide used memory." : undefined}>{gpu.memory_label ? "Client Memory Used" : "VRAM Used"}</dt>
+                            <dd>{gpu.memory_label ? toResidentMemory(gpu.memory_used) : toGiB(gpu.memory_used)}</dd>
+                        </div>
+                        <div className="detail-row">
+                            <dt>{gpu.memory_label ? "GPU Memory Total" : "VRAM Total"}</dt>
+                            <dd>{toGiB(gpu.memory_total)}</dd>
+                        </div>
                         <div className="detail-row"><dt>Temperature</dt><dd>{gpu.temperature_c === null ? "N/A" : `${gpu.temperature_c}°C`}</dd></div>
                     </dl>
                 </>
