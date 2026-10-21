@@ -49,6 +49,7 @@ class GPUResponse(BaseModel):
     memory_label: str | None = None
     clock_mhz: float | None = None
     max_clock_mhz: float | None = None
+    memory_clock_mhz: float | None = None
     power_watts: float | None = None
     gpu_type: Literal["integrated", "dedicated"] | None = None
 
