@@ -14,6 +14,7 @@ import {
     getMemoryUsage,
     getStorageInfo,
     getStorageDevices,
+    getStoragePartitions,
     getSystemInfo,
     getNetworkInfo,
     getNetworkInterfaces,
@@ -34,6 +35,9 @@ export default function Dashboard() {
     const { data: storageDevices, error: storageDevicesError } =
         usePolling(getStorageDevices, 1000);
 
+    const { data: partitions, error: partitionsError } =
+        usePolling(getStoragePartitions, 10000);
+
     const { data: system, error: systemError } =
         usePolling(getSystemInfo, 5000);
 
@@ -49,7 +53,7 @@ export default function Dashboard() {
     const errors = [
         cpuError ? "CPU" : null,
         memoryError ? "Memory" : null,
-        storageError || storageDevicesError ? "Storage" : null,
+        storageError || storageDevicesError || partitionsError ? "Storage" : null,
         systemError ? "System" : null,
         networkError || networkInterfacesError ? "Network" : null,
         gpuError ? "GPU" : null
@@ -75,7 +79,7 @@ export default function Dashboard() {
             <div className="metric-grid">
                 <CPUCard cpu={cpu} />
                 <MemoryCard memory={memory} />
-                <DiskCard storage={storage} devices={storageDevices} />
+                <DiskCard storage={storage} devices={storageDevices} partitions={partitions} />
                 <SystemCard system={system} />
                 <NetworkCard network={network} interfaces={networkInterfaces} />
                 <GPUCard gpus={gpus} />
