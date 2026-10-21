@@ -9,6 +9,8 @@ from functools import lru_cache
 from pathlib import Path
 from threading import Lock
 
+from app.services.gpu_identity import identify_gpu
+
 
 DRM_ROOT = Path("/sys/class/drm")
 PROC_ROOT = Path("/proc")
@@ -125,11 +127,7 @@ def get_intel_gpu_info() -> dict | None:
     except OSError:
         device_id = None
 
-    name = (
-        "Intel Lunar Lake Graphics"
-        if device_id == "0x64a0"
-        else "Intel Graphics"
-    )
+    name, gpu_type = identify_gpu("intel", device)
 
     with _sample_lock:
         current = get_gpu_clients(device.name)
@@ -143,6 +141,7 @@ def get_intel_gpu_info() -> dict | None:
     return {
         "available": True,
         "name": name,
+        "gpu_type": gpu_type,
         "usage": usage,
         "usage_label": "Peak Client Engine Activity",
         "memory_used": None,
