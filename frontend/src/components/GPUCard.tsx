@@ -1,4 +1,4 @@
-import { memo, useEffect, useState } from "react";
+import { memo, useState } from "react";
 import { ChevronLeft, ChevronRight, CircuitBoard } from "lucide-react";
 import type { GPUDeviceResponse } from "../services/api";
 
@@ -9,13 +9,6 @@ function GPUCard({ gpus }: GPUCardProps) {
     const devices = gpus ?? [];
     const index = Math.max(0, devices.findIndex((gpu) => gpu.id === selectedId));
     const gpu = devices[index];
-
-    useEffect(() => {
-        if (gpus && gpus.length && !gpus.some((item) => item.id === selectedId)) {
-            // Default to the first detected device; preserve selection between polls.
-            setSelectedId(gpus[0].id);
-        }
-    }, [gpus, selectedId]);
 
     const select = (offset: number) => {
         if (!devices.length) return;
