@@ -129,8 +129,8 @@ function GPUCard({ gpus }: GPUCardProps) {
                                         <dd>{gpu.power_watts == null ? "N/A" : `${gpu.power_watts.toFixed(2)} W`}</dd>
                                     </div>
                                     <div className="detail-row">
-                                        <dt>Temperature</dt>
-                                        <dd>{gpu.temperature_c == null ? "N/A" : `${gpu.temperature_c}°C`}</dd>
+                                        <dt>Memory Clock</dt>
+                                        <dd>{gpu.memory_clock_mhz == null ? "N/A" : `${gpu.memory_clock_mhz.toFixed(0)} MHz`}</dd>
                                     </div>
                                 </>
                             )}
