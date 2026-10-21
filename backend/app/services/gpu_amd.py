@@ -1,6 +1,8 @@
 from functools import lru_cache
 from pathlib import Path
 
+from app.services.gpu_identity import identify_gpu
+
 
 @lru_cache(maxsize=1)
 def get_amd_gpu_path() -> Path | None:
@@ -67,9 +69,12 @@ def get_amd_gpu_info() -> dict | None:
             temperature = round(value / 1000)
             break
 
+    name, gpu_type = identify_gpu("amd", device)
+
     return {
         "available": True,
-        "name": "AMD Radeon Graphics",
+        "name": name,
+        "gpu_type": gpu_type,
         "usage": usage,
         "memory_used": memory_used,
         "memory_total": memory_total,
