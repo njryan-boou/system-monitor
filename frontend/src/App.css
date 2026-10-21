@@ -537,3 +537,7 @@
 }
 .storage-partition-info span { max-width: 100%; overflow-wrap: anywhere; }
 .storage-partition-info span:last-child { color: #94a3b8; font-size: 11px; }
+
+/* Network Adapter view: keep three equal-width navigation tabs. */
+.network-view-button { padding: 8px 3px; }
+.network-primary-stat .metric-primary { overflow-wrap: anywhere; }
